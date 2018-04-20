@@ -1,3 +1,5 @@
+import imp
+from imp import reload
 from itertools import cycle
 import random
 import sys
@@ -19,7 +21,7 @@ diff_x = 0
 diff_y = 0
 is_alive = True
 has_to_flap = False
-ballek = 0
+has_to_start = False
 
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
@@ -63,6 +65,8 @@ except NameError:
 
 
 def main():
+
+
     global SCREEN, FPSCLOCK
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
@@ -136,12 +140,16 @@ def main():
             getHitmask(IMAGES['player'][2]),
         )
 
+        # Herel's modifications
+        global diff_x, diff_y, is_alive, has_to_flap, has_to_start
+        diff_x = 0
+        diff_y = 0
+        is_alive = True
+        has_to_flap = False
+
         movementInfo = showWelcomeAnimation()
         crashInfo = mainGame(movementInfo)
         showGameOverScreen(crashInfo)
-
-        if is_alive is not True:
-            return
 
 
 def showWelcomeAnimation():
@@ -165,14 +173,6 @@ def showWelcomeAnimation():
     # player shm for up-down motion on welcome screen
     playerShmVals = {'val': 0, 'dir': 1}
 
-    # Herel's modifications
-    # Plays immediatly
-    SOUNDS['wing'].play()
-    return {
-        'playery': playery + playerShmVals['val'],
-        'basex': basex,
-        'playerIndexGen': playerIndexGen,
-    }
 
     while True:
         for event in pygame.event.get():
@@ -188,6 +188,16 @@ def showWelcomeAnimation():
                     'playerIndexGen': playerIndexGen,
                 }
 
+        # Herel's modifications
+        # Plays immediatly
+        global has_to_start
+        if has_to_start:
+            SOUNDS['wing'].play()
+            return {
+                'playery': playery + playerShmVals['val'],
+                'basex': basex,
+                'playerIndexGen': playerIndexGen,
+            }
         # adjust playery, playerIndex, basex
         if (loopIter + 1) % 5 == 0:
             playerIndex = next(playerIndexGen)
@@ -245,10 +255,8 @@ def mainGame(movementInfo):
 
     # Herel's modifications
     global has_to_flap
-    global ballek
 
     while True:
-        ballek += 1
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 pygame.quit()
@@ -370,7 +378,7 @@ def showGameOverScreen(crashInfo):
     # Herel's modification
     global is_alive
     is_alive = False
-    return
+
     score = crashInfo['score']
     playerx = SCREENWIDTH * 0.2
     playery = crashInfo['y']
@@ -398,6 +406,11 @@ def showGameOverScreen(crashInfo):
                 if playery + playerHeight >= BASEY - 1:
                     return
 
+        # Herel's modifications
+        global has_to_start
+        if has_to_start and playery + playerHeight >= BASEY - 1:
+            has_to_start = False
+            return
         # player y shift
         if playery + playerHeight < BASEY - 1:
             playery += min(playerVelY, BASEY - playery - playerHeight)
@@ -535,6 +548,10 @@ def getHitmask(image):
 def flap():
     global has_to_flap
     has_to_flap = True
+
+def start():
+    global has_to_start
+    has_to_start = True
 
 
 if __name__ == '__main__':

@@ -1,10 +1,13 @@
 import _thread
 import os
 import random
+from imp import reload
 from multiprocessing import Process
 from queue import Queue
 from time import sleep, time
 from typing import List
+
+import pygame
 
 import keras
 from keras import Sequential
@@ -51,20 +54,18 @@ def create_first_population(population_length=8):
     return birds
 
 
-def start_flappy(queue):
-    #flappy.main()
+def start_flappy():
+    flappy.main()
 
-    os.system("python flappy.py")
-    queue.put(0)
 
 
 def observe_bird(bird: Bird, queue: Queue):
-    sleep(1)
 
     while flappy.is_alive:
         bird.increase_fiteness()
-
-        if bird.should_flap(flappy.diff_x, flappy.diff_y):
+        prediction = bird.should_flap(flappy.diff_x, flappy.diff_y)
+        print(prediction)
+        if prediction:
             flappy.flap()
         sleep(0.05)
 
@@ -73,8 +74,7 @@ def observe_bird(bird: Bird, queue: Queue):
 
 
 def main():
-
-
+    _thread.start_new_thread(start_flappy, ())
 
     for _ in range(3):
 
@@ -86,27 +86,24 @@ def main():
         bird = Bird()
         bird.create_brain()
 
+        queue = Queue()
+
         # Tensorflow error without sleep
         sleep(1)
 
-        queue = Queue()
+        flappy.start()
 
         # Does nothing on the bird beahivour but Keras crashes if prediction is not used in the main thread at least once
         bird.should_flap(0, 0)
 
-        #Process(target=start_flappy, args=()).start()
-        try:
-            _thread.start_new_thread(start_flappy, (queue,))
-            _thread.start_new_thread(observe_bird, (bird, queue))
+        _thread.start_new_thread(observe_bird, (bird, queue))
+        queue.get()
 
-        except:
-            import traceback
-            traceback.format_exc()
 
         # Updates bird
-        bird = queue.get()
         #print(bird.fitness)
         sleep(1)
 
 if __name__ == "__main__":
     main()
+    #_thread.start_new_thread(start_flappy, ())
