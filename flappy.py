@@ -144,7 +144,6 @@ def main():
             return
 
 
-
 def showWelcomeAnimation():
     """Shows welcome screen animation of flappy bird"""
     # index of player to blit on screen
@@ -165,7 +164,6 @@ def showWelcomeAnimation():
 
     # player shm for up-down motion on welcome screen
     playerShmVals = {'val': 0, 'dir': 1}
-
 
     # Herel's modifications
     # Plays immediatly
@@ -268,7 +266,6 @@ def mainGame(movementInfo):
             playerFlapped = True
             SOUNDS['wing'].play()
             has_to_flap = False
-
 
         # check for crash here
         crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},
@@ -534,11 +531,11 @@ def getHitmask(image):
     return mask
 
 
-if __name__ == '__main__':
-    main()
-
-
 # Herel's modification
 def flap():
     global has_to_flap
     has_to_flap = True
+
+
+if __name__ == '__main__':
+    main()

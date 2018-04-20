@@ -9,9 +9,12 @@ class Bird:
 
     def __init__(self):
         self.model = None
-        self.activate_brain()
 
-    def activate_brain(self, inputs):
+        self.activate_brain()
+        self.fitness = 0
+        self.index = 0
+
+    def activate_brain(self):
         """
         Creates the bird's neural network
         inputs is an array
@@ -27,15 +30,6 @@ class Bird:
 
         sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
         self.model.compile(loss="mse", optimizer=sgd, metrics=["accuracy"])
-
-
-        # Converts the array in 2D: Keras needs a 2 dimensional array
-        # Dim 1: The items array. The length is always 1 in this case
-        # Dim 2: The input length.
-        inputs = np.atleast_2d(inputs)
-
-        prediction = self.model.predict(inputs)
-        print(prediction)
 
     def crossover(cls, bird1, bird2):
         """
@@ -77,6 +71,18 @@ class Bird:
                     weights[layer][weight] += mutation
 
         return weights
+
+    def should_flap(self, diff_x, diff_y):
+        # Converts the array in 2D: Keras needs a 2 dimensional array
+        # Dim 1: The items array. The length is always 1 in this case
+        # Dim 2: The input length.
+        inputs = np.atleast_2d([diff_x, diff_y])
+
+        prediction = self.model.predict(inputs)
+        return prediction > 0.5
+
+    def increase_fiteness(self):
+        self.fitness += 1
 
     crossover = classmethod(crossover)
     mutate = classmethod(mutate)

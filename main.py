@@ -1,6 +1,8 @@
 import _thread
+import os
 import random
 from time import sleep, time
+from typing import List
 
 from keras import Sequential
 from keras.layers import Dense, np
@@ -35,19 +37,58 @@ def activate_brain():
     print(prediction)
 
 
+def create_first_population(population_length=8):
+    birds = []
+    for _ in range(population_length):
+        birds.append(Bird())
+
+    return birds
+
+
+i = 0
+birds = []
+
+
 def start_flappy():
-    flappy.main()
+    global i, birds
+    for _ in birds:
+        flappy.main()
+
+        i += 1
+
+    birds.sort(key=lambda x: x.fitness, reverse=True)
+    for bird in birds:
+        print(bird.index)
+    # os.system("python flappy.py")
 
 
 def count_flappy():
+    global birds
     while True:
         # X nearest pipe: pipemidpos
-        #print("{}".format(flappy.diff_x))
-        flappy.flap()
-        sleep(0.5)
+        # print("{}".format(flappy.diff_x))
+
+        bird = birds[i]
+
+        # CODE DEGEULASSE A VIRER
+        bird.index = i
+
+        if bird.should_flap(flappy.diff_x, flappy.diff_y):
+            flappy.flap()
+
+        sleep(0.05)
 
 
+def main():
+    global birds
+    birds = create_first_population()
 
-thread1 = _thread.start_new_thread(start_flappy, ())
+    #_thread.start_new_thread(start_flappy, ())
+    #_thread.start_new_thread(count_flappy, ())
 
-_thread.start_new_thread(count_flappy, ())
+    s = birds[i].should_flap(50, 50)
+    print(s)
+
+
+if __name__ == "__main__":
+    main()
