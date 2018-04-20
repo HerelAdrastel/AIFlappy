@@ -1,6 +1,7 @@
 import _thread
 import os
 import random
+from queue import Queue
 from time import sleep, time
 from typing import List
 
@@ -45,12 +46,11 @@ def create_first_population(population_length=8):
     return birds
 
 
-
 def start_flappy():
     flappy.main()
 
 
-def observe_bird(bird: Bird):
+def observe_bird(bird: Bird, queue: Queue):
     sleep(1)
 
     while flappy.is_alive:
@@ -61,21 +61,24 @@ def observe_bird(bird: Bird):
         sleep(0.05)
 
     print(bird.fitness)
+    queue.put(bird)
 
 
 def main():
-
     bird = Bird()
     bird.create_brain()
 
+    queue = Queue()
+
+    # Does nothing on the bird beahivour but Keras crashes if prediction is not used in the main thread at least once
+    bird.should_flap(0, 0)
+
     _thread.start_new_thread(start_flappy, ())
-    _thread.start_new_thread(observe_bird, (bird,))
+    _thread.start_new_thread(observe_bird, (bird, queue))
 
-    print(bird.should_flap(flappy.diff_x, flappy.diff_y))
-    print(bird.should_flap(1, 1))
-
-
-
+    # Updates bird
+    bird = queue.get()
+    print(bird.fitness)
 
 if __name__ == "__main__":
     main()
