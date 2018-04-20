@@ -53,6 +53,8 @@ def create_first_population(population_length=8):
 
     return birds
 
+def sort_birds_by_fitness(birds):
+    return sorted(birds, key=lambda x: x.fitness, reverse=True)
 
 def start_flappy():
     flappy.main()
@@ -75,15 +77,15 @@ def observe_bird(bird: Bird, queue: Queue):
 
 def main():
     _thread.start_new_thread(start_flappy, ())
-
-    for _ in range(3):
+    birds = create_first_population()
+    for i in range(3):
 
         session = tf.Session()
         backend.set_session(session)
         backend.get_session().run(tf.global_variables_initializer())
         sleep(1)
 
-        bird = Bird()
+        bird = birds[i]
         bird.create_brain()
 
         queue = Queue()
@@ -97,12 +99,16 @@ def main():
         bird.should_flap(0, 0)
 
         _thread.start_new_thread(observe_bird, (bird, queue))
-        queue.get()
-
+        bird = queue.get()
+        birds[i] = bird
 
         # Updates bird
         #print(bird.fitness)
         sleep(1)
+
+    sortedBirds = sort_birds_by_fitness(birds)
+    for bird in sortedBirds:
+        print(bird.fitness)
 
 if __name__ == "__main__":
     main()
