@@ -45,49 +45,36 @@ def create_first_population(population_length=8):
     return birds
 
 
-i = 0
-birds = []
-
 
 def start_flappy():
-    global i, birds
-    for _ in birds:
-        flappy.main()
-
-        i += 1
-
-    birds.sort(key=lambda x: x.fitness, reverse=True)
-    for bird in birds:
-        print(bird.index)
-    # os.system("python flappy.py")
+    flappy.main()
 
 
-def count_flappy():
-    global birds
-    while True:
-        # X nearest pipe: pipemidpos
-        # print("{}".format(flappy.diff_x))
+def observe_bird(bird: Bird):
+    sleep(1)
 
-        bird = birds[i]
-
-        # CODE DEGEULASSE A VIRER
-        bird.index = i
+    while flappy.is_alive:
+        bird.increase_fiteness()
 
         if bird.should_flap(flappy.diff_x, flappy.diff_y):
             flappy.flap()
-
         sleep(0.05)
+
+    print(bird.fitness)
 
 
 def main():
-    global birds
-    birds = create_first_population()
 
-    #_thread.start_new_thread(start_flappy, ())
-    #_thread.start_new_thread(count_flappy, ())
+    bird = Bird()
+    bird.create_brain()
 
-    s = birds[i].should_flap(50, 50)
-    print(s)
+    _thread.start_new_thread(start_flappy, ())
+    _thread.start_new_thread(observe_bird, (bird,))
+
+    print(bird.should_flap(flappy.diff_x, flappy.diff_y))
+    print(bird.should_flap(1, 1))
+
+
 
 
 if __name__ == "__main__":

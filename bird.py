@@ -9,12 +9,10 @@ class Bird:
 
     def __init__(self):
         self.model = None
-
-        self.activate_brain()
         self.fitness = 0
         self.index = 0
 
-    def activate_brain(self):
+    def create_brain(self):
         """
         Creates the bird's neural network
         inputs is an array
