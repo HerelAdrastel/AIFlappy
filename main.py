@@ -1,15 +1,20 @@
 import _thread
 import os
 import random
+from multiprocessing import Process
 from queue import Queue
 from time import sleep, time
 from typing import List
 
+import keras
 from keras import Sequential
 from keras.layers import Dense, np
 from keras.optimizers import SGD
 import flappy
 from bird import Bird
+
+import tensorflow as tf
+from keras import backend
 
 
 def activate_brain():
@@ -46,8 +51,11 @@ def create_first_population(population_length=8):
     return birds
 
 
-def start_flappy():
-    flappy.main()
+def start_flappy(queue):
+    #flappy.main()
+
+    os.system("python flappy.py")
+    queue.put(0)
 
 
 def observe_bird(bird: Bird, queue: Queue):
@@ -65,20 +73,40 @@ def observe_bird(bird: Bird, queue: Queue):
 
 
 def main():
-    bird = Bird()
-    bird.create_brain()
 
-    queue = Queue()
 
-    # Does nothing on the bird beahivour but Keras crashes if prediction is not used in the main thread at least once
-    bird.should_flap(0, 0)
 
-    _thread.start_new_thread(start_flappy, ())
-    _thread.start_new_thread(observe_bird, (bird, queue))
+    for _ in range(3):
 
-    # Updates bird
-    bird = queue.get()
-    print(bird.fitness)
+        session = tf.Session()
+        backend.set_session(session)
+        backend.get_session().run(tf.global_variables_initializer())
+        sleep(1)
+
+        bird = Bird()
+        bird.create_brain()
+
+        # Tensorflow error without sleep
+        sleep(1)
+
+        queue = Queue()
+
+        # Does nothing on the bird beahivour but Keras crashes if prediction is not used in the main thread at least once
+        bird.should_flap(0, 0)
+
+        #Process(target=start_flappy, args=()).start()
+        try:
+            _thread.start_new_thread(start_flappy, (queue,))
+            _thread.start_new_thread(observe_bird, (bird, queue))
+
+        except:
+            import traceback
+            traceback.format_exc()
+
+        # Updates bird
+        bird = queue.get()
+        #print(bird.fitness)
+        sleep(1)
 
 if __name__ == "__main__":
     main()
