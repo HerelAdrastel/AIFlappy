@@ -22,6 +22,7 @@ diff_y = 0
 is_alive = True
 has_to_flap = False
 has_to_start = False
+has_to_restart = False
 
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
@@ -65,8 +66,6 @@ except NameError:
 
 
 def main():
-
-
     global SCREEN, FPSCLOCK
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
@@ -172,7 +171,6 @@ def showWelcomeAnimation():
 
     # player shm for up-down motion on welcome screen
     playerShmVals = {'val': 0, 'dir': 1}
-
 
     while True:
         for event in pygame.event.get():
@@ -407,9 +405,9 @@ def showGameOverScreen(crashInfo):
                     return
 
         # Herel's modifications
-        global has_to_start
-        if has_to_start and playery + playerHeight >= BASEY - 1:
-            has_to_start = False
+        global has_to_restart
+        if has_to_restart and playery + playerHeight >= BASEY - 1:
+            has_to_restart = False
             return
         # player y shift
         if playery + playerHeight < BASEY - 1:
@@ -549,9 +547,14 @@ def flap():
     global has_to_flap
     has_to_flap = True
 
+
 def start():
-    global has_to_start
-    has_to_start = True
+    global has_to_start, has_to_restart
+    if has_to_start is not True:
+        has_to_start = True
+
+    else:
+        has_to_restart = True
 
 
 if __name__ == '__main__':

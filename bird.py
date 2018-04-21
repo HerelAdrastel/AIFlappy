@@ -17,17 +17,18 @@ class Bird:
         Creates the bird's neural network
         inputs is an array
         """
+        if self.model is None:
+            self.model = Sequential()  # Model Creation
 
-        self.model = Sequential()  # Model Creation
+            # Create a hidden layer with 2 input layers and 16 neurons and relu activation
+            self.model.add(Dense(units=16, input_dim=2, activation="relu"))
 
-        # Create a hidden layer with 2 input layers and 16 neurons and relu activation
-        self.model.add(Dense(units=16, input_dim=2, activation="relu"))
+            # Create the output layer
+            self.model.add(Dense(units=1, activation='sigmoid'))
 
-        # Create the output layer
-        self.model.add(Dense(units=1, activation='sigmoid'))
-
-        sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-        self.model.compile(loss="mse", optimizer=sgd, metrics=["accuracy"])
+            sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+            self.model.compile(loss="mse", optimizer=sgd, metrics=["accuracy"])
+            self.model._make_predict_function()
 
     def crossover(cls, bird1, bird2):
         """
