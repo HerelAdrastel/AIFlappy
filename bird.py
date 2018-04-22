@@ -11,6 +11,7 @@ class Bird:
         self.model = None
         self.fitness = 0
         self.index = 0
+        self.distance_traveled = 0
 
     def create_brain(self):
         """
@@ -30,33 +31,63 @@ class Bird:
             self.model.compile(loss="mse", optimizer=sgd, metrics=["accuracy"])
             self.model._make_predict_function()
 
-    def crossover(cls, bird1, bird2):
+            # By default, all biases are set to 0
+            # Set all biases to a random number
+            for layer in self.model.layers:
+                weights = layer.get_weights()
+                new_biases = np.random.uniform(size=len(weights[1]))
+
+                weights[1] = new_biases
+                layer.set_weights(weights)
+
+
+    def crossover(cls, birdA, birdB):
         """
         Static method
         Exchanges the hidden layer input weights
-        Note: Sequencial.getweights() gives [layer 1[weight input 1, weight input 2], layer2[weight input 1]
+        The Keras model organisation
+        Layers:
+            Weights
+                Input 1
+                Input 2
+            Biases
+
+        Examples:
+            To get biases of the first layer : model.layers[0].get_weights()[1]
+            To get the weights of the first input of the first layer : model.layer[0].get_weights()[0][0]
         """
 
-        # Gets the neural network
-        model1: Sequential = bird1.model
-        model2: Sequential = bird2.model
+        # Gets all the weights of the first layer
+        weightsA = birdA.model.layers[0].get_weights()
+        weightsB = birdB.model.layers[0].get_weights()
+        # todo: bias are all zeros
 
-        # Get all the weights of the first layer
-        weights1 = model1.get_weights()[0]
-        weights2 = model2.get_weights()[0]
+        # Get all the biases of the first layer
+        biasesA = weightsA[1]
+        biasesB = weightsB[1]
 
-        weightsnew1 = weights1
-        weightsnew2 = weights2
+        # Determines where we must make the separation of the genome
+        cut = random.randint(0, len(biasesA))
 
-        # Crosses over the first input weight with the second input weights
-        weightsnew1[0] = weights2[0]
-        weightsnew2[0] = weights1[0]
+        for i in range(cut):
+            oldBiasA = biasesA[i]
+            biasesA[i] = biasesB[i]
+            biasesB[i] = oldBiasA
 
+
+        # Updates the weights
+        weightsA[1] = biasesA
+        weightsB[1] = biasesB
+
+        birdA.model.set_weights(weightsA)
+        birdB.model.set_weights(weightsB)
+
+        # todo: optimisation possible
         if random.random() < 0.5:
-            return np.array([weightsnew1])
+            return birdA
 
         else:
-            return np.array([weightsnew2])
+            return birdB
 
     def mutate(self, mutation_probability=0.2, mutation_strength=0.5):
 
@@ -83,8 +114,10 @@ class Bird:
         return prediction > 0.5
 
     def increase_fiteness(self, diff_x):
-        self.fitness += 1
-        self.fitness -= diff_x
-        #self.fitness += 20 * 1 / (diff_y * diff_y * 5 + 1)
+        self.distance_traveled += 5
+        self.fitness = self.distance_traveled - diff_x
+        print(self.fitness)
+        #self.fitness -= diff_x / 20
+        #self.fitness += 40 * 1 / (diff_y * diff_y * 5 + 1)
 
     crossover = classmethod(crossover)

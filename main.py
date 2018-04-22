@@ -7,6 +7,7 @@ from bird import Bird
 
 
 def create_first_population(population_length):
+    # todo: bias are all zeros
     birds = []
     for _ in range(population_length):
         birds.append(Bird())
@@ -52,20 +53,10 @@ def start_flappy():
     flappy.main()
 
 
-def observe_bird(bird: Bird, queue: Queue):
-    while flappy.is_alive:
-        bird.increase_fiteness(flappy.diff_y)
-        prediction = bird.should_flap(flappy.diff_x, flappy.diff_y)
-        if prediction:
-            flappy.flap()
-        sleep(0.05)
-
-    queue.put(bird)
-
 
 def main():
     _thread.start_new_thread(start_flappy, ())
-    birds = create_first_population(8)
+    birds = create_first_population(2)
 
     generation = 1
 
@@ -91,7 +82,7 @@ def main():
             while flappy.is_alive:
                 diff_x = flappy.diff_x
                 diff_y = flappy.diff_y
-                bird.increase_fiteness(diff_y)
+                bird.increase_fiteness(diff_x)
                 prediction = bird.should_flap(diff_x, diff_y)
                 if prediction:
                     flappy.flap()
@@ -101,7 +92,7 @@ def main():
             # Updates array
             birds[i] = bird
             print("Generation {}: - Individual {}: - Fitness: {}".format(generation, i, bird.fitness))
-
+            input()
 
         birds = sort_birds_by_fitness(birds)
         evolve_population(birds)
