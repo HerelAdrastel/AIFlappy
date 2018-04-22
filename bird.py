@@ -54,11 +54,9 @@ class Bird:
 
         return np.array([weightnew1, weightnew2])
 
-    def mutate(cls, Bird, mutation_probability=0.2, mutation_strength=0.5):
+    def mutate(self, mutation_probability=0.2, mutation_strength=0.5):
 
-        model: Sequential = Bird.model
-
-        weights = model.get_weights()
+        weights = self.model.get_weights()
 
         for layer in range(len(weights)):
             inputs = weights[layer]
@@ -68,8 +66,6 @@ class Bird:
                 if random.random() <= mutation_probability:
                     mutation = random.uniform(- mutation_strength, + mutation_strength)
                     weights[layer][weight] += mutation
-
-        return weights
 
     def should_flap(self, diff_x, diff_y):
         # Converts the array in 2D: Keras needs a 2 dimensional array
@@ -84,4 +80,3 @@ class Bird:
         self.fitness += 1
 
     crossover = classmethod(crossover)
-    mutate = classmethod(mutate)
