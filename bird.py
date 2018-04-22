@@ -82,8 +82,9 @@ class Bird:
         prediction = self.model.predict(inputs)
         return prediction > 0.5
 
-    def increase_fiteness(self, diff_y):
+    def increase_fiteness(self, diff_x):
         self.fitness += 1
-        self.fitness += 20 * 1 / (diff_y * diff_y * 5 + 1)
+        self.fitness -= diff_x
+        #self.fitness += 20 * 1 / (diff_y * diff_y * 5 + 1)
 
     crossover = classmethod(crossover)

@@ -19,6 +19,11 @@ def sort_birds_by_fitness(birds):
 
 
 def evolve_population(population):
+
+    # If all birds coudn't read halt distance of the first barrier, kill them all
+    if population[0].fitness < 0:
+        return create_first_population(len(population))
+
     new_weights = []
 
     new_weights.append(population[0].model.get_weights())
@@ -49,7 +54,7 @@ def start_flappy():
 
 def observe_bird(bird: Bird, queue: Queue):
     while flappy.is_alive:
-        bird.increase_fiteness()
+        bird.increase_fiteness(flappy.diff_y)
         prediction = bird.should_flap(flappy.diff_x, flappy.diff_y)
         if prediction:
             flappy.flap()
@@ -74,7 +79,6 @@ def main():
             # Tensorflow error without sleep
             sleep(0.2)
 
-            sleep(2)
             flappy.start()
             # Does nothing on the bird beahivour but Keras crashes if prediction is not used in the main thread at least once
             bird.should_flap(0, 0)

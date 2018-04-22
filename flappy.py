@@ -333,8 +333,8 @@ def mainGame(movementInfo):
             playerRot = 45
 
 
-        #playery += min(playerVelY, BASEY - playery - playerHeight)
-        playery = pygame.mouse.get_pos()[1] - playerHeight
+        playery += min(playerVelY, BASEY - playery - playerHeight)
+        # playery = pygame.mouse.get_pos()[1] - playerHeight
 
         # move pipes to left
         for uPipe, lPipe in zip(upperPipes, lowerPipes):
