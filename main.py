@@ -56,12 +56,12 @@ def observe_bird(bird: Bird, queue: Queue):
 
 def main():
     _thread.start_new_thread(start_flappy, ())
-    birds = create_first_population()
+    birds = create_first_population(20)
 
     generation = 1
 
     while True:
-        for i in range(8):
+        for i in range(len(birds)):
             bird = birds[i]
             bird.create_brain()
 
@@ -75,14 +75,22 @@ def main():
             # Does nothing on the bird beahivour but Keras crashes if prediction is not used in the main thread at least once
             bird.should_flap(0, 0)
 
-            _thread.start_new_thread(observe_bird, (bird, queue))
-            bird = queue.get()
+            #_thread.start_new_thread(observe_bird, (bird, queue))
+            #bird = queue.get()
+            flappy.is_alive = True
+            while flappy.is_alive:
+                bird.increase_fiteness()
+                prediction = bird.should_flap(flappy.diff_x, flappy.diff_y)
+                if prediction:
+                    flappy.flap()
+                sleep(0.05)
+
 
             # Updates array
             birds[i] = bird
 
             print("Generation {}: - Individual {}: - Fitness: {}".format(generation, i, bird.fitness))
-            sleep(0.2)
+            sleep(1)
 
         birds = sort_birds_by_fitness(birds)
         evolve_population(birds)

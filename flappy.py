@@ -551,9 +551,11 @@ def flap():
 def start():
     global has_to_start, has_to_restart
     if has_to_start is not True:
+        print("Starting...")
         has_to_start = True
 
     else:
+        print("Restarting...")
         has_to_restart = True
 
 
