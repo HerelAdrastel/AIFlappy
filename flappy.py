@@ -141,8 +141,6 @@ def main():
 
         # Herel's modifications
         global diff_x, diff_y, is_alive, has_to_flap, has_to_start
-        diff_x = 0
-        diff_y = 0
         is_alive = True
         has_to_flap = False
 
@@ -265,6 +263,7 @@ def mainGame(movementInfo):
                     playerFlapped = True
                     SOUNDS['wing'].play()
 
+
         # Herel's modifications
         # Reponds to flap function
         if playery > -2 * IMAGES['player'][0].get_height() and has_to_flap:
@@ -296,10 +295,13 @@ def mainGame(movementInfo):
                 break
             i += 1
 
+        playerHeight = IMAGES['player'][playerIndex].get_height()
+
         gap_height = lowerPipes[i]['y'] - IMAGES['pipe'][0].get_height() - upperPipes[i]['y']
         gap_y = upperPipes[i]['y'] + IMAGES['pipe'][0].get_height() + gap_height / 2
         diff_x = upperPipes[i]['x'] - playerx
-        diff_y = abs(playery - gap_y)
+        diff_y = playery - gap_y + 16
+        print(diff_y)
 
         # check for score
         playerMidPos = playerx + IMAGES['player'][0].get_width() / 2
@@ -328,8 +330,9 @@ def mainGame(movementInfo):
             # more rotation to cover the threshold (calculated in visible rotation)
             playerRot = 45
 
-        playerHeight = IMAGES['player'][playerIndex].get_height()
-        playery += min(playerVelY, BASEY - playery - playerHeight)
+
+        #playery += min(playerVelY, BASEY - playery - playerHeight)
+        playery = pygame.mouse.get_pos()[1] - playerHeight
 
         # move pipes to left
         for uPipe, lPipe in zip(upperPipes, lowerPipes):
@@ -551,11 +554,9 @@ def flap():
 def start():
     global has_to_start, has_to_restart
     if has_to_start is not True:
-        print("Starting...")
         has_to_start = True
 
     else:
-        print("Restarting...")
         has_to_restart = True
 
 

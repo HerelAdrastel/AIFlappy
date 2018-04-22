@@ -45,14 +45,18 @@ class Bird:
         weights1 = model1.get_weights()[0]
         weights2 = model2.get_weights()[0]
 
-        weightnew1 = weights1
-        weightnew2 = weights2
+        weightsnew1 = weights1
+        weightsnew2 = weights2
 
         # Crosses over the first input weight with the second input weights
-        weightnew1[0] = weights2[0]
-        weightnew2[0] = weights1[0]
+        weightsnew1[0] = weights2[0]
+        weightsnew2[0] = weights1[0]
 
-        return np.array([weightnew1, weightnew2])
+        if random.random() < 0.5:
+            return np.array([weightsnew1])
+
+        else:
+            return np.array([weightsnew2])
 
     def mutate(self, mutation_probability=0.2, mutation_strength=0.5):
 
@@ -67,6 +71,8 @@ class Bird:
                     mutation = random.uniform(- mutation_strength, + mutation_strength)
                     weights[layer][weight] += mutation
 
+        self.model.set_weights(weights)
+
     def should_flap(self, diff_x, diff_y):
         # Converts the array in 2D: Keras needs a 2 dimensional array
         # Dim 1: The items array. The length is always 1 in this case
@@ -76,7 +82,8 @@ class Bird:
         prediction = self.model.predict(inputs)
         return prediction > 0.5
 
-    def increase_fiteness(self):
+    def increase_fiteness(self, diff_y):
         self.fitness += 1
+        self.fitness += 20 * 1 / (diff_y * diff_y * 5 + 1)
 
     crossover = classmethod(crossover)

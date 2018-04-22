@@ -6,7 +6,7 @@ import flappy
 from bird import Bird
 
 
-def create_first_population(population_length=8):
+def create_first_population(population_length):
     birds = []
     for _ in range(population_length):
         birds.append(Bird())
@@ -21,20 +21,24 @@ def sort_birds_by_fitness(birds):
 def evolve_population(population):
     new_weights = []
 
-    del population[:-1]
-    population.append(Bird())
-
+    new_weights.append(population[0].model.get_weights())
+    new_weights.append(population[1].model.get_weights())
     new_weights.append(Bird.crossover(population[0], population[1]))
     new_weights.append(Bird.crossover(population[1], population[0]))
 
-    for i in range(2, len(population)):
-        new_weights.append(population[i])
+    for i in range(4, len(population)):
+        new_weights.append(population[i].model.get_weights())
 
     for i in range(len(population)):
-        new_weights[i] = Bird.mutate(population[i])
 
         # Update weights
         population[i].model.set_weights(new_weights[i])
+        population[i].mutate()
+        population[i].fitness = 0
+
+
+    del population[-1]
+    population.append(Bird())
 
     return population
 
@@ -56,7 +60,7 @@ def observe_bird(bird: Bird, queue: Queue):
 
 def main():
     _thread.start_new_thread(start_flappy, ())
-    birds = create_first_population(20)
+    birds = create_first_population(8)
 
     generation = 1
 
@@ -75,12 +79,15 @@ def main():
             # Does nothing on the bird beahivour but Keras crashes if prediction is not used in the main thread at least once
             bird.should_flap(0, 0)
 
-            #_thread.start_new_thread(observe_bird, (bird, queue))
-            #bird = queue.get()
             flappy.is_alive = True
+            flappy.diff_y = 400
+            flappy.diff_x = 200
             while flappy.is_alive:
-                bird.increase_fiteness()
-                prediction = bird.should_flap(flappy.diff_x, flappy.diff_y)
+
+                diff_x = flappy.diff_x
+                diff_y = flappy.diff_y
+                bird.increase_fiteness(diff_y)
+                prediction = bird.should_flap(diff_x, diff_y)
                 if prediction:
                     flappy.flap()
                 sleep(0.05)
@@ -88,9 +95,9 @@ def main():
 
             # Updates array
             birds[i] = bird
-
+            print(diff_y)
             print("Generation {}: - Individual {}: - Fitness: {}".format(generation, i, bird.fitness))
-            sleep(1)
+            input()
 
         birds = sort_birds_by_fitness(birds)
         evolve_population(birds)
