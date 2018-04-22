@@ -23,6 +23,7 @@ is_alive = True
 has_to_flap = False
 has_to_start = False
 has_to_restart = False
+score = 0
 
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
@@ -213,6 +214,8 @@ def showWelcomeAnimation():
 
 
 def mainGame(movementInfo):
+    global score
+
     score = playerIndex = loopIter = 0
     playerIndexGen = movementInfo['playerIndexGen']
     playerx, playery = int(SCREENWIDTH * 0.2), movementInfo['playery']
@@ -301,7 +304,6 @@ def mainGame(movementInfo):
         gap_y = upperPipes[i]['y'] + IMAGES['pipe'][0].get_height() + gap_height / 2
         diff_x = upperPipes[i]['x'] - playerx
         diff_y = playery - gap_y + 16
-        print(diff_y)
 
         # check for score
         playerMidPos = playerx + IMAGES['player'][0].get_width() / 2

@@ -74,16 +74,17 @@ def main():
             # Tensorflow error without sleep
             sleep(0.2)
 
+            sleep(2)
             flappy.start()
-
             # Does nothing on the bird beahivour but Keras crashes if prediction is not used in the main thread at least once
             bird.should_flap(0, 0)
 
             flappy.is_alive = True
-            flappy.diff_y = 400
-            flappy.diff_x = 200
-            while flappy.is_alive:
+            flappy.score = 0
+            flappy.diff_x = 0
+            flappy.diff_y = 0
 
+            while flappy.is_alive:
                 diff_x = flappy.diff_x
                 diff_y = flappy.diff_y
                 bird.increase_fiteness(diff_y)
@@ -95,9 +96,8 @@ def main():
 
             # Updates array
             birds[i] = bird
-            print(diff_y)
             print("Generation {}: - Individual {}: - Fitness: {}".format(generation, i, bird.fitness))
-            input()
+
 
         birds = sort_birds_by_fitness(birds)
         evolve_population(birds)
