@@ -1,11 +1,10 @@
-import imp
-from imp import reload
-from itertools import cycle
 import random
 import sys
+from itertools import cycle
 
 import pygame
 from pygame.locals import *
+import numpy as np
 
 FPS = 30
 SCREENWIDTH = 288
@@ -17,14 +16,16 @@ BASEY = SCREENHEIGHT * 0.79
 IMAGES, SOUNDS, HITMASKS = {}, {}, {}
 
 # Herel's modifications
-diff_x = 0
-diff_y = 0
+population = 8
+diff_x = np.zeros(population)
+diff_y = np.zeros(population)
 is_alive = True
 has_to_flap = False
 has_to_start = False
 has_to_restart = False
 score = 0
 playery = 0
+
 
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
@@ -219,7 +220,12 @@ def mainGame(movementInfo):
 
     score = playerIndex = loopIter = 0
     playerIndexGen = movementInfo['playerIndexGen']
-    playerx, playery = int(SCREENWIDTH * 0.2), movementInfo['playery']
+
+
+    #playerx, playery = int(SCREENWIDTH * 0.2), movementInfo['playery']
+
+    playerx = np.ones(population) * int(SCREENWIDTH * 0.2)
+    playery = np.ones(population) * movementInfo['playery']
 
     basex = movementInfo['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
@@ -241,104 +247,95 @@ def mainGame(movementInfo):
         {'x': SCREENWIDTH - 90 + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
     ]
 
-    pipeVelX = -4
+    pipeVelX = np.ones(population) * -4
 
     # player velocity, max velocity, downward accleration, accleration on flap
-    playerVelY = -9  # player's velocity along Y, default same as playerFlapped
+    playerVelY = np.ones(population) * -9  # player's velocity along Y, default same as playerFlapped
     playerMaxVelY = 10  # max vel along Y, max descend speed
     playerMinVelY = -8  # min vel along Y, max ascend speed
-    playerAccY = 1  # players downward accleration
-    playerRot = 45  # player's rotation
-    playerVelRot = 3  # angular speed
-    playerRotThr = 20  # rotation threshold
+    playerAccY = np.ones(population) * 1  # players downward accleration
+    playerRot = np.ones(population) * 45  # player's rotation
+    playerVelRot = np.ones(population) * 3  # angular speed
+    playerRotThr = np.ones(population) * 20  # rotation threshold
     playerFlapAcc = -9  # players speed on flapping
-    playerFlapped = False  # True when player flaps
+    playerFlapped = np.full(population, False)  # True when player flaps
 
     # Herel's modifications
     global has_to_flap
 
     while True:
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                pygame.quit()
-                sys.exit()
-            if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
-                if playery > -2 * IMAGES['player'][0].get_height():
-                    playerVelY = playerFlapAcc
-                    playerFlapped = True
-                    SOUNDS['wing'].play()
-
 
         # Herel's modifications
         # Reponds to flap function
-        if playery > -2 * IMAGES['player'][0].get_height() and has_to_flap:
-            playerVelY = playerFlapAcc
-            playerFlapped = True
-            SOUNDS['wing'].play()
-            has_to_flap = False
+        for i in range(population):
+            if playery[i] > -2 * IMAGES['player'][0].get_height() and has_to_flap[i]:
+                playerVelY[i] = playerFlapAcc
+                playerFlapped[i] = True
+                SOUNDS['wing'].play()
+                has_to_flap[i] = False
 
-        # check for crash here
-        crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},
-                               upperPipes, lowerPipes)
-        if crashTest[0]:
-            return {
-                'y': playery,
-                'groundCrash': crashTest[1],
-                'basex': basex,
-                'upperPipes': upperPipes,
-                'lowerPipes': lowerPipes,
-                'score': score,
-                'playerVelY': playerVelY,
-                'playerRot': playerRot
-            }
-        # Herel's modification
-        global diff_x
-        global diff_y
-        i = 0
-        while True:
-            if upperPipes[i]['x'] > playerx:
-                break
-            i += 1
+            # check for crash here
+            crashTest = checkCrash({'x': playerx[i], 'y': playery[i], 'index': playerIndex},
+                                   upperPipes, lowerPipes)
+            if crashTest[0]:
+                return {
+                    'y': playery,
+                    'groundCrash': crashTest[1],
+                    'basex': basex,
+                    'upperPipes': upperPipes,
+                    'lowerPipes': lowerPipes,
+                    'score': score,
+                    'playerVelY': playerVelY,
+                    'playerRot': playerRot
+                }
+            # Herel's modification
+            global diff_x
+            global diff_y
+            j = 0
+            while True:
+                if upperPipes[j]['x'] > playerx:
+                    break
+                j += 1
 
-        playerHeight = IMAGES['player'][playerIndex].get_height()
+            playerHeight = IMAGES['player'][playerIndex].get_height()
 
-        gap_height = lowerPipes[i]['y'] - IMAGES['pipe'][0].get_height() - upperPipes[i]['y']
-        gap_y = upperPipes[i]['y'] + IMAGES['pipe'][0].get_height() + gap_height / 2
-        diff_x = upperPipes[i]['x'] - playerx
-        diff_y = playery - gap_y + 16
+            gap_height = lowerPipes[j]['y'] - IMAGES['pipe'][0].get_height() - upperPipes[j]['y']
+            gap_y = upperPipes[j]['y'] + IMAGES['pipe'][0].get_height() + gap_height / 2
+            diff_x[i] = upperPipes[j]['x'] - playerx
+            diff_y[i] = playery - gap_y + 16
 
-        # check for score
-        playerMidPos = playerx + IMAGES['player'][0].get_width() / 2
-        for pipe in upperPipes:
-            pipeMidPos = pipe['x'] + IMAGES['pipe'][0].get_width() / 2
-            if pipeMidPos <= playerMidPos < pipeMidPos + 4:
-                score += 1
-                SOUNDS['point'].play()
+            # check for score
+            playerMidPos = playerx[i] + IMAGES['player'][0].get_width() / 2
+            for pipe in upperPipes:
+                pipeMidPos = pipe['x'] + IMAGES['pipe'][0].get_width() / 2
+                if pipeMidPos <= playerMidPos < pipeMidPos + 4:
+                    score += 1
+                    SOUNDS['point'].play()
 
-        # playerIndex basex change
-        if (loopIter + 1) % 3 == 0:
-            playerIndex = next(playerIndexGen)
-        loopIter = (loopIter + 1) % 30
-        basex = -((-basex + 100) % baseShift)
+            # playerIndex basex change
+            if (loopIter + 1) % 3 == 0:
+                playerIndex = next(playerIndexGen)
+            loopIter = (loopIter + 1) % 30
+            basex = -((-basex + 100) % baseShift)
 
-        # rotate the player
-        if playerRot > -90:
-            playerRot -= playerVelRot
+            # rotate the player
+            if playerRot[i] > -90:
+                playerRot[i] -= playerVelRot[i]
 
-        # player's movement
-        if playerVelY < playerMaxVelY and not playerFlapped:
-            playerVelY += playerAccY
-        if playerFlapped:
-            playerFlapped = False
+            # player's movement
+            if playerVelY[i] < playerMaxVelY and not playerFlapped[i]:
+                playerVelY[i] += playerAccY[i]
+            if playerFlapped[i]:
+                playerFlapped[i] = False
 
-            # more rotation to cover the threshold (calculated in visible rotation)
-            playerRot = 45
+                # more rotation to cover the threshold (calculated in visible rotation)
+                playerRot[i] = 45
 
 
 
-        playery += min(playerVelY, BASEY - playery - playerHeight)
-        #playery = pygame.mouse.get_pos()[1] - playerHeight
-        #print(diff_x)
+            playery[i] += min(playerVelY[i], BASEY - playery[i] - playerHeight)
+            #playery = pygame.mouse.get_pos()[1] - playerHeight
+            #print(diff_x)
 
         # move pipes to left
         for uPipe, lPipe in zip(upperPipes, lowerPipes):
@@ -367,13 +364,15 @@ def mainGame(movementInfo):
         # print score so player overlaps the score
         showScore(score)
 
-        # Player rotation has a threshold
-        visibleRot = playerRotThr
-        if playerRot <= playerRotThr:
-            visibleRot = playerRot
 
-        playerSurface = pygame.transform.rotate(IMAGES['player'][playerIndex], visibleRot)
-        SCREEN.blit(playerSurface, (playerx, playery))
+        for i in range(population):
+            # Player rotation has a threshold
+            visibleRot = playerRotThr[i]
+            if playerRot[i] <= playerRotThr[i]:
+                visibleRot = playerRot[i]
+
+            playerSurface = pygame.transform.rotate(IMAGES['player'][playerIndex], visibleRot)
+            SCREEN.blit(playerSurface, (playerx[i], playery[i]))
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
