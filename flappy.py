@@ -231,14 +231,14 @@ def mainGame(movementInfo):
     # list of upper pipes
     # Herels modifictions: Passed from 200 to 0
     upperPipes = [
-        {'x': SCREENWIDTH + 200, 'y': newPipe1[0]['y']},
-        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newPipe2[0]['y']},
+        {'x': SCREENWIDTH - 90, 'y': newPipe1[0]['y']},
+        {'x': SCREENWIDTH - 90 + (SCREENWIDTH / 2), 'y': newPipe2[0]['y']},
     ]
 
     # list of lowerpipe
     lowerPipes = [
-        {'x': SCREENWIDTH + 200, 'y': newPipe1[1]['y']},
-        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
+        {'x': SCREENWIDTH - 90, 'y': newPipe1[1]['y']},
+        {'x': SCREENWIDTH - 90 + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
     ]
 
     pipeVelX = -4
@@ -335,9 +335,10 @@ def mainGame(movementInfo):
             playerRot = 45
 
 
+
         playery += min(playerVelY, BASEY - playery - playerHeight)
         #playery = pygame.mouse.get_pos()[1] - playerHeight
-
+        #print(diff_x)
 
         # move pipes to left
         for uPipe, lPipe in zip(upperPipes, lowerPipes):

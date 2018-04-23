@@ -77,6 +77,8 @@ def main():
     old_fitness_mean = 0
     new_fitness_mean = 0
 
+    best_bird_ever = Bird()
+    best_score_ever = 0
 
     birds = create_first_population(population)
 
@@ -125,9 +127,12 @@ def main():
             print("Generation {}: - Individual {}: - Fitness: {}".format(generation, i, bird.fitness))
 
 
+
         birds = sort_birds_by_fitness(birds)
 
+
         # Code moche !!!!!!
+
         for bird in birds:
             new_fitness_mean += bird.fitness
 
@@ -137,6 +142,12 @@ def main():
         # todo: garder le meilleur oiseau de tout les temps
         # todo : fitness : score - A * diffX
         # todo: ne pas avoir le debug, spawn pipes direct
+
+        if birds[0].fitness > best_score_ever:
+            best_bird_ever = best_bird_ever
+            best_score_ever = birds[0].fitness
+            print("New best score with {} !".format(best_score_ever))
+
         if birds[0].fitness == 0:
             print("Starting new population. This one was too bad :(")
             generation = 0
@@ -147,6 +158,7 @@ def main():
 
         else:
             birds = evolve_population(birds)
+            birds[population - 1] = best_bird_ever
 
         generation += 1
 
