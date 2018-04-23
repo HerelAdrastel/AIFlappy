@@ -24,6 +24,7 @@ has_to_flap = False
 has_to_start = False
 has_to_restart = False
 score = 0
+playery = 0
 
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
@@ -214,7 +215,7 @@ def showWelcomeAnimation():
 
 
 def mainGame(movementInfo):
-    global score
+    global score, playery
 
     score = playerIndex = loopIter = 0
     playerIndexGen = movementInfo['playerIndexGen']
@@ -228,6 +229,7 @@ def mainGame(movementInfo):
     newPipe2 = getRandomPipe()
 
     # list of upper pipes
+    # Herels modifictions: Passed from 200 to 0
     upperPipes = [
         {'x': SCREENWIDTH + 200, 'y': newPipe1[0]['y']},
         {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newPipe2[0]['y']},
@@ -336,6 +338,7 @@ def mainGame(movementInfo):
         playery += min(playerVelY, BASEY - playery - playerHeight)
         #playery = pygame.mouse.get_pos()[1] - playerHeight
 
+
         # move pipes to left
         for uPipe, lPipe in zip(upperPipes, lowerPipes):
             uPipe['x'] += pipeVelX
@@ -373,6 +376,7 @@ def mainGame(movementInfo):
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+
 
 
 def showGameOverScreen(crashInfo):

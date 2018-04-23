@@ -12,6 +12,7 @@ class Bird:
         self.fitness = 0
         self.index = 0
         self.distance_traveled = 0
+        self.score = 0
 
     def create_brain(self):
         """
@@ -40,7 +41,6 @@ class Bird:
                 weights[1] = new_biases
                 layer.set_weights(weights)
 
-
     def crossover(cls, birdA, birdB):
         """
         Static method
@@ -51,6 +51,9 @@ class Bird:
                 Input 1
                 Input 2
             Biases
+        OU
+        Weights
+            Layers
 
         Examples:
             To get biases of the first layer : model.layers[0].get_weights()[1]
@@ -60,7 +63,6 @@ class Bird:
         # Gets all the weights of the first layer
         weightsA = birdA.model.layers[0].get_weights()
         weightsB = birdB.model.layers[0].get_weights()
-        # todo: bias are all zeros
 
         # Get all the biases of the first layer
         biasesA = weightsA[1]
@@ -73,7 +75,6 @@ class Bird:
             oldBiasA = biasesA[i]
             biasesA[i] = biasesB[i]
             biasesB[i] = oldBiasA
-
 
         # Updates the weights
         weightsA[1] = biasesA
@@ -89,20 +90,31 @@ class Bird:
         else:
             return birdB
 
-    def mutate(self, mutation_probability=0.2, mutation_strength=0.5):
+    def mutate(self, mutation_probability=0.2, mutation_strength=0.3):
 
-        weights = self.model.get_weights()
+        for layer in self.model.layers:
+            infos = layer.get_weights()
 
-        for layer in range(len(weights)):
-            inputs = weights[layer]
+            weights = infos[0]
+            biases = infos[1]
 
-            for weight in range(len(inputs)):
+            for inputs in range(len(weights)):
+                for input in range(len(weights[inputs])):
+                    new_weight = Bird.mutate_weight(input, mutation_probability, mutation_strength)
+                    layer.get_weights()[0][inputs][input] = new_weight
 
-                if random.random() <= mutation_probability:
-                    mutation = random.uniform(- mutation_strength, + mutation_strength)
-                    weights[layer][weight] += mutation
+            for bias in range(len(biases)):
+                new_bias = Bird.mutate_weight(bias, mutation_probability, mutation_strength)
+                layer.get_weights()[1][bias] = new_bias
 
-        self.model.set_weights(weights)
+
+    def mutate_weight(cls, weight, mutation_probability, mutation_strength):
+
+        if random.random() < mutation_probability:
+            mutationIntensity = 1 + random.uniform(- mutation_strength, mutation_strength)
+            weight *= mutationIntensity
+
+        return weight
 
     def should_flap(self, diff_x, diff_y):
         # Converts the array in 2D: Keras needs a 2 dimensional array
@@ -113,11 +125,15 @@ class Bird:
         prediction = self.model.predict(inputs)
         return prediction > 0.5
 
-    def increase_fiteness(self, diff_x):
-        self.distance_traveled += 5
-        self.fitness = self.distance_traveled - diff_x
-        print(self.fitness)
-        #self.fitness -= diff_x / 20
-        #self.fitness += 40 * 1 / (diff_y * diff_y * 5 + 1)
+    def increase_fitness(self, diff_x, score):
+
+        self.distance_traveled += 1
+        self.fitness = score
+        #self.fitness = 5 * self.distance_traveled - diff_x + 1000 * score
+        # self.fitness -= diff_x / 20
+        #self.fitness += 10 * 1 / (diff_y * diff_y * 5 + 1) # + self.distance_traveled
+        #self.fitness += 5 - (1 / 5000) * pow(diff_y, 2)
+
 
     crossover = classmethod(crossover)
+    mutate_weight = classmethod(mutate_weight)
