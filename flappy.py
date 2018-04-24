@@ -63,10 +63,7 @@ PIPES_LIST = (
     'assets/sprites/pipe-red.png',
 )
 
-try:
-    xrange
-except NameError:
-    xrange = range
+xrange = range
 
 
 def main():
@@ -148,12 +145,12 @@ def main():
         is_alive = True
         has_to_flap = False
 
-        movementInfo = showWelcomeAnimation()
-        mainGame(movementInfo)
-        #showGameOverScreen(crashInfo)
+        movementInfo = show_welcome_animation()
+        crashInfo = main_game(movementInfo)
+        show_game_over_screen(crashInfo)
 
 
-def showWelcomeAnimation():
+def show_welcome_animation():
     """Shows welcome screen animation of flappy bird"""
     # index of player to blit on screen
     playerIndex = 0
@@ -224,19 +221,19 @@ def showWelcomeAnimation():
         FPSCLOCK.tick(FPS)
 
 
-def mainGame(movementInfo):
+def main_game(movement_info):
     global score, playery
 
     score = playerIndex = loopIter = 0
-    playerIndexGen = movementInfo['playerIndexGen']
+    playerIndexGen = movement_info['playerIndexGen']
 
-    # playerx, playery = int(SCREENWIDTH * 0.2), movementInfo['playery']
+    # playerx, playery = int(SCREENWIDTH * 0.2), movement_info['playery']
 
     playerx = np.ones(population) * int(SCREENWIDTH * 0.2)
-    # playery = np.ones(population) * movementInfo['playery']
-    playery = np.random.uniform(-0.5, 0.5, population) * movementInfo['playery']
+    # playery = np.ones(population) * movement_info['playery']
+    playery = np.random.uniform(-0.5, 0.5, population) * movement_info['playery']
 
-    basex = movementInfo['basex']
+    basex = movement_info['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
 
     # get 2 new pipes to add to upperPipes lowerPipes list
@@ -261,7 +258,6 @@ def mainGame(movementInfo):
     # player velocity, max velocity, downward accleration, accleration on flap
     playerVelY = np.ones(population) * -9  # player's velocity along Y, default same as playerFlapped
     playerMaxVelY = 10  # max vel along Y, max descend speed
-    playerMinVelY = -8  # min vel along Y, max ascend speed
     playerAccY = np.ones(population) * 1  # players downward accleration
     playerRot = np.ones(population) * 45  # player's rotation
     playerVelRot = np.ones(population) * 3  # angular speed
@@ -289,19 +285,21 @@ def mainGame(movementInfo):
             crashTest = checkCrash({'x': playerx[i], 'y': playery[i], 'index': playerIndex},
                                    upperPipes, lowerPipes)
             if crashTest[0]:
-                crashInfos = {
-                    'y': playery[i],
-                    'groundCrash': crashTest[1],
-                    'basex': basex,
-                    'upperPipes': upperPipes,
-                    'lowerPipes': lowerPipes,
-                    'score': score,
-                    'playerVelY': playerVelY[i],
-                    'playerRot': playerRot[i]
-                }
-                birds = np.delete(birds, np.where(birds == i))
-                continue
-                #showGameOverScreen(crashInfos)
+                if len(birds) == 1:
+                    return {
+                        'y': playery[i],
+                        'groundCrash': crashTest[1],
+                        'basex': basex,
+                        'upperPipes': upperPipes,
+                        'lowerPipes': lowerPipes,
+                        'score': score,
+                        'playerVelY': playerVelY[i],
+                        'playerRot': playerRot[i]
+                    }
+                else:
+                    birds = np.delete(birds, np.where(birds == i))
+                    continue
+                # showGameOverScreen(crashInfos)
             # Herel's modification
             global diff_x
             global diff_y
@@ -389,7 +387,7 @@ def mainGame(movementInfo):
         FPSCLOCK.tick(FPS)
 
 
-def showGameOverScreen(crashInfo):
+def show_game_over_screen(crashInfo):
     """crashes the player down ans shows gameover image"""
 
     # Herel's modification
