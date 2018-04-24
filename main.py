@@ -4,6 +4,7 @@ from math import ceil
 from queue import Queue
 from time import sleep
 
+import numpy as np
 import flappy
 from bird import Bird
 
@@ -56,7 +57,6 @@ def evolve_population(birds, best_birds=3):
             # Make a mutation
             new_birds[i].mutate()
 
-
         # Reset fitness
         new_birds[i].distance_traveled = 0
         new_birds[i].fitness = 0
@@ -68,10 +68,15 @@ def start_flappy():
     flappy.main()
 
 
+def reset_bird(bird):
+    bird.fitness = 0
+    bird.distance_traveled = 0
+    bird.create_brain()
+
 
 def main():
+    # Starts game
     _thread.start_new_thread(start_flappy, ())
-
     generation = 1
     population = 8
     old_fitness_mean = 0
@@ -84,52 +89,46 @@ def main():
 
     while True:
         old_fitness_mean = new_fitness_mean
-        for i in range(len(birds)):
-            bird = birds[i]
 
-            # Code moche
-            birds[i].fitness = 0
-            birds[i].distance_traveled = 0
-            # Fin
-
-            bird.create_brain()
-
-            # Tensorflow error without sleep
+        for bird in birds:
+            reset_bird(bird)
+            # todo: tester de l'enlever
             sleep(0.2)
 
-            flappy.start()
-            # Does nothing on the bird beahivour but Keras crashes if prediction is not used in the main thread at least once
-            bird.should_flap(0, 0)
+        flappy.start()
 
-            flappy.is_alive = True
-            flappy.score = 0
-            flappy.diff_x = 0
-            flappy.diff_y = 0
+        # todo: passer le tout en fonction
+        # todo: passer le tout dans flappy.py et supprimer ici
+        flappy.score = 0
+        flappy.diff_x = np.zeros(population)
+        flappy.diff_y = np.zeros(population)
+        flappy.is_alive = np.full(8, True)
 
-            while flappy.is_alive:
-                diff_x = flappy.diff_x
-                diff_y = flappy.diff_y
-                bird.score = flappy.score
-                bird.increase_fitness(diff_x, flappy.score)
+        # While at least one bird is alive
+        while np.all([flappy.is_alive, np.full(population, True)]):
 
+            for i in range(len(birds)):
 
-                prediction = bird.should_flap(diff_x, diff_y)
-                if prediction:
-                    flappy.flap()
+                if flappy.is_alive[i]:
+                    bird = birds[i]
 
-                #print("{}\t{}".format(diff_x, bird.distance_traveled))
+                    # todo : tester avant de l'enlever
+                    bird.should_flap(0, 0)
 
-                sleep(0.05)
+                    diff_x = flappy.diff_x[i]
+                    diff_y = flappy.diff_y[i]
 
+                    prediction = bird.should_flap(diff_x, diff_y)
+                    if prediction:
+                        flappy.flap(i)
 
-            # Updates array
-            birds[i] = bird
-            print("Generation {}: - Individual {}: - Fitness: {}".format(generation, i, bird.fitness))
+            # sleep(0.05)
 
-
+        # Updates array
+        #birds[i] = bird
+        #print("Generation {}: - Individual {}: - Fitness: {}".format(generation, i, bird.fitness))
 
         birds = sort_birds_by_fitness(birds)
-
 
         # Code moche !!!!!!
 
@@ -150,7 +149,7 @@ def main():
 
         if birds[0].fitness == 0:
             print("Starting new population. This one was too bad :(")
-            generation = 0
+            #generation = 0
 
             best = birds[0]
             birds = create_first_population(population)

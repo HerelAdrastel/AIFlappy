@@ -19,12 +19,11 @@ IMAGES, SOUNDS, HITMASKS = {}, {}, {}
 population = 8
 diff_x = np.zeros(population)
 diff_y = np.zeros(population)
-is_alive = True
-has_to_flap = False
+is_alive = np.full(8, True)
+has_to_flap = np.full(8, False)
 has_to_start = False
 has_to_restart = False
 score = 0
-playery = 0
 
 birds = np.arange(population)
 
@@ -142,8 +141,8 @@ def main():
 
         # Herel's modifications
         global diff_x, diff_y, is_alive, has_to_flap, has_to_start
-        is_alive = True
-        has_to_flap = False
+        is_alive = np.full(population, True)
+        has_to_flap = np.full(population, False)
 
         movementInfo = show_welcome_animation()
         crashInfo = main_game(movementInfo)
@@ -187,11 +186,6 @@ def show_welcome_animation():
 
         # A RETIERER
         SOUNDS['wing'].play()
-        return {
-            'playery': playery + playerShmVals['val'],
-            'basex': basex,
-            'playerIndexGen': playerIndexGen,
-        }
 
         # Herel's modifications
         # Plays immediatly
@@ -222,16 +216,14 @@ def show_welcome_animation():
 
 
 def main_game(movement_info):
-    global score, playery
+    global score, birds
 
     score = playerIndex = loopIter = 0
     playerIndexGen = movement_info['playerIndexGen']
 
     # playerx, playery = int(SCREENWIDTH * 0.2), movement_info['playery']
-
     playerx = np.ones(population) * int(SCREENWIDTH * 0.2)
-    # playery = np.ones(population) * movement_info['playery']
-    playery = np.random.uniform(-0.5, 0.5, population) * movement_info['playery']
+    playery = np.ones(population) * movement_info['playery']
 
     basex = movement_info['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
@@ -265,21 +257,22 @@ def main_game(movement_info):
     playerFlapAcc = -9  # players speed on flapping
     playerFlapped = np.full(population, False)  # True when player flaps
 
+    birds = np.arange(population)
     # Herel's modifications
-    global has_to_flap
+    global has_to_flap, is_alive
+    is_alive = np.full(population, True)
 
     while True:
 
         # Herel's modifications
         # Reponds to flap function
-        global birds
         for i in birds:
             # 1changer has to flap
-            if playery[i] > -2 * IMAGES['player'][0].get_height() and has_to_flap:
+            if playery[i] > -2 * IMAGES['player'][0].get_height() and has_to_flap[i]:
                 playerVelY[i] = playerFlapAcc
                 playerFlapped[i] = True
                 SOUNDS['wing'].play()
-                has_to_flap = False
+                has_to_flap[i] = False
 
             # check for crash here
             crashTest = checkCrash({'x': playerx[i], 'y': playery[i], 'index': playerIndex},
@@ -298,6 +291,7 @@ def main_game(movement_info):
                     }
                 else:
                     birds = np.delete(birds, np.where(birds == i))
+                    is_alive[i] = False
                     continue
                 # showGameOverScreen(crashInfos)
             # Herel's modification
@@ -389,10 +383,6 @@ def main_game(movement_info):
 
 def show_game_over_screen(crashInfo):
     """crashes the player down ans shows gameover image"""
-
-    # Herel's modification
-    global is_alive
-    is_alive = False
 
     score = crashInfo['score']
     playerx = SCREENWIDTH * 0.2
@@ -553,9 +543,9 @@ def getHitmask(image):
 
 
 # Herel's modification
-def flap():
+def flap(i):
     global has_to_flap
-    has_to_flap = True
+    has_to_flap[i] = True
 
 
 def start():
