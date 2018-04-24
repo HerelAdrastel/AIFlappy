@@ -28,6 +28,8 @@ score = np.zeros(8)
 
 birds = np.arange(population)
 
+# Reminder : to avoid the window to freeze, add pygame.event.pump() in the main loop
+
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
     # red bird
@@ -141,7 +143,7 @@ def main():
         )
 
         # Herel's modifications
-        global diff_x, diff_y, is_alive, has_to_flap, has_to_start
+        global diff_x, diff_y, is_alive, has_to_flap, has_to_start, score
         is_alive = np.full(population, True)
         has_to_flap = np.full(population, False)
 
@@ -152,6 +154,7 @@ def main():
 
 def show_welcome_animation():
     """Shows welcome screen animation of flappy bird"""
+
     # index of player to blit on screen
     playerIndex = 0
     playerIndexGen = cycle([0, 1, 2, 1])
@@ -172,17 +175,14 @@ def show_welcome_animation():
     playerShmVals = {'val': 0, 'dir': 1}
 
     while True:
+        pygame.event.pump()
 
-        if __name__ == '__main__':
-            SOUNDS['wing'].play()
-            return {
-                'playery': playery + playerShmVals['val'],
-                'basex': basex,
-                'playerIndexGen': playerIndexGen,
-            }
-
-
-        # Plays immediatly
+        # Allows to start the game by script
+        return {
+            'playery': playery + playerShmVals['val'],
+            'basex': basex,
+            'playerIndexGen': playerIndexGen,
+        }
         global has_to_start
         if has_to_start:
             SOUNDS['wing'].play()
@@ -191,7 +191,8 @@ def show_welcome_animation():
                 'basex': basex,
                 'playerIndexGen': playerIndexGen,
             }
-        # adjust playery, playerIndex, basex
+
+        # Makes the sinusoide
         if (loopIter + 1) % 5 == 0:
             playerIndex = next(playerIndexGen)
         loopIter = (loopIter + 1) % 30
@@ -210,6 +211,7 @@ def show_welcome_animation():
 
 
 def main_game(movement_info):
+
     global score, birds
 
     playerIndex = loopIter = 0
@@ -218,8 +220,8 @@ def main_game(movement_info):
 
     # playerx, playery = int(SCREENWIDTH * 0.2), movement_info['playery']
     playerx = np.ones(population) * int(SCREENWIDTH * 0.2)
-    playery = np.ones(population) * movement_info['playery']
-
+    #playery = np.ones(population) * movement_info['playery']
+    playery = np.random.uniform(-0.5, 0.5, population)
     basex = movement_info['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
 
@@ -258,8 +260,13 @@ def main_game(movement_info):
     is_alive = np.full(population, True)
 
     while True:
+
+        # Avoids the window to freeze
+        pygame.event.pump()
+
         # Herel's modifications
         # Reponds to flap function
+        print(len(birds))
         for i in birds:
             # 1changer has to flap
             if playery[i] > -2 * IMAGES['player'][0].get_height() and has_to_flap[i]:
@@ -397,6 +404,9 @@ def show_game_over_screen(crashInfo):
         SOUNDS['die'].play()
 
     while True:
+
+        # Avoids the window to freeze
+        pygame.event.pump()
 
         # Herel's modifications
         global has_to_restart

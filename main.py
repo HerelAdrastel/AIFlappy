@@ -78,7 +78,7 @@ def main():
     # Starts game
     _thread.start_new_thread(start_flappy, ())
     generation = 1
-    population = 1
+    population = 8
     old_fitness_mean = 0
     new_fitness_mean = 0
 
@@ -100,6 +100,7 @@ def main():
 
         # todo: passer le tout en fonction
         # todo: passer le tout dans flappy.py et supprimer ici
+        flappy.pooulation = population
         flappy.score = np.zeros(population)
         flappy.diff_x = np.zeros(population)
         flappy.diff_y = np.zeros(population)
@@ -120,10 +121,11 @@ def main():
 
                     diff_x = flappy.diff_x[i]
                     diff_y = flappy.diff_y[i]
-
+                    # todo : resoudre le problème des scores
                     prediction = bird.should_flap(diff_x, diff_y)
                     if prediction:
-                        flappy.flap(i)
+                        None
+                        #flappy.flap(i)
 
             sleep(0.01)
 
