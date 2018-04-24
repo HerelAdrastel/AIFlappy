@@ -26,6 +26,7 @@ has_to_restart = False
 score = 0
 playery = 0
 
+birds = np.arange(population)
 
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
@@ -148,8 +149,8 @@ def main():
         has_to_flap = False
 
         movementInfo = showWelcomeAnimation()
-        crashInfo = mainGame(movementInfo)
-        showGameOverScreen(crashInfo)
+        mainGame(movementInfo)
+        #showGameOverScreen(crashInfo)
 
 
 def showWelcomeAnimation():
@@ -187,6 +188,14 @@ def showWelcomeAnimation():
                     'playerIndexGen': playerIndexGen,
                 }
 
+        # A RETIERER
+        SOUNDS['wing'].play()
+        return {
+            'playery': playery + playerShmVals['val'],
+            'basex': basex,
+            'playerIndexGen': playerIndexGen,
+        }
+
         # Herel's modifications
         # Plays immediatly
         global has_to_start
@@ -221,11 +230,11 @@ def mainGame(movementInfo):
     score = playerIndex = loopIter = 0
     playerIndexGen = movementInfo['playerIndexGen']
 
-
-    #playerx, playery = int(SCREENWIDTH * 0.2), movementInfo['playery']
+    # playerx, playery = int(SCREENWIDTH * 0.2), movementInfo['playery']
 
     playerx = np.ones(population) * int(SCREENWIDTH * 0.2)
-    playery = np.ones(population) * movementInfo['playery']
+    # playery = np.ones(population) * movementInfo['playery']
+    playery = np.random.uniform(-0.5, 0.5, population) * movementInfo['playery']
 
     basex = movementInfo['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
@@ -247,7 +256,7 @@ def mainGame(movementInfo):
         {'x': SCREENWIDTH - 90 + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
     ]
 
-    pipeVelX = np.ones(population) * -4
+    pipeVelX = -4
 
     # player velocity, max velocity, downward accleration, accleration on flap
     playerVelY = np.ones(population) * -9  # player's velocity along Y, default same as playerFlapped
@@ -267,33 +276,38 @@ def mainGame(movementInfo):
 
         # Herel's modifications
         # Reponds to flap function
-        for i in range(population):
-            if playery[i] > -2 * IMAGES['player'][0].get_height() and has_to_flap[i]:
+        global birds
+        for i in birds:
+            # 1changer has to flap
+            if playery[i] > -2 * IMAGES['player'][0].get_height() and has_to_flap:
                 playerVelY[i] = playerFlapAcc
                 playerFlapped[i] = True
                 SOUNDS['wing'].play()
-                has_to_flap[i] = False
+                has_to_flap = False
 
             # check for crash here
             crashTest = checkCrash({'x': playerx[i], 'y': playery[i], 'index': playerIndex},
                                    upperPipes, lowerPipes)
             if crashTest[0]:
-                return {
-                    'y': playery,
+                crashInfos = {
+                    'y': playery[i],
                     'groundCrash': crashTest[1],
                     'basex': basex,
                     'upperPipes': upperPipes,
                     'lowerPipes': lowerPipes,
                     'score': score,
-                    'playerVelY': playerVelY,
-                    'playerRot': playerRot
+                    'playerVelY': playerVelY[i],
+                    'playerRot': playerRot[i]
                 }
+                birds = np.delete(birds, np.where(birds == i))
+                continue
+                #showGameOverScreen(crashInfos)
             # Herel's modification
             global diff_x
             global diff_y
             j = 0
             while True:
-                if upperPipes[j]['x'] > playerx:
+                if upperPipes[j]['x'] > playerx[i]:
                     break
                 j += 1
 
@@ -301,8 +315,8 @@ def mainGame(movementInfo):
 
             gap_height = lowerPipes[j]['y'] - IMAGES['pipe'][0].get_height() - upperPipes[j]['y']
             gap_y = upperPipes[j]['y'] + IMAGES['pipe'][0].get_height() + gap_height / 2
-            diff_x[i] = upperPipes[j]['x'] - playerx
-            diff_y[i] = playery - gap_y + 16
+            diff_x[i] = upperPipes[j]['x'] - playerx[i]
+            diff_y[i] = playery[i] - gap_y + 16
 
             # check for score
             playerMidPos = playerx[i] + IMAGES['player'][0].get_width() / 2
@@ -331,11 +345,9 @@ def mainGame(movementInfo):
                 # more rotation to cover the threshold (calculated in visible rotation)
                 playerRot[i] = 45
 
-
-
             playery[i] += min(playerVelY[i], BASEY - playery[i] - playerHeight)
-            #playery = pygame.mouse.get_pos()[1] - playerHeight
-            #print(diff_x)
+            # playery = pygame.mouse.get_pos()[1] - playerHeight
+            # print(diff_x)
 
         # move pipes to left
         for uPipe, lPipe in zip(upperPipes, lowerPipes):
@@ -364,8 +376,7 @@ def mainGame(movementInfo):
         # print score so player overlaps the score
         showScore(score)
 
-
-        for i in range(population):
+        for i in birds:
             # Player rotation has a threshold
             visibleRot = playerRotThr[i]
             if playerRot[i] <= playerRotThr[i]:
@@ -376,7 +387,6 @@ def mainGame(movementInfo):
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
-
 
 
 def showGameOverScreen(crashInfo):
@@ -405,13 +415,6 @@ def showGameOverScreen(crashInfo):
         SOUNDS['die'].play()
 
     while True:
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                pygame.quit()
-                sys.exit()
-            if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
-                if playery + playerHeight >= BASEY - 1:
-                    return
 
         # Herel's modifications
         global has_to_restart
