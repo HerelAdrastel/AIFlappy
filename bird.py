@@ -125,7 +125,7 @@ class Bird:
         prediction = self.model.predict(inputs)
         return prediction > 0.5
 
-    def increase_fitness(self, diff_x, score):
+    def increase_fitness(self, score):
 
         self.distance_traveled += 1
         self.fitness = score

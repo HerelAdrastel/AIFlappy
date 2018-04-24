@@ -1,6 +1,7 @@
 import random
 import sys
 from itertools import cycle
+from time import sleep
 
 import pygame
 from pygame.locals import *
@@ -23,7 +24,7 @@ is_alive = np.full(8, True)
 has_to_flap = np.full(8, False)
 has_to_start = False
 has_to_restart = False
-score = 0
+score = np.zeros(8)
 
 birds = np.arange(population)
 
@@ -171,23 +172,16 @@ def show_welcome_animation():
     playerShmVals = {'val': 0, 'dir': 1}
 
     while True:
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                pygame.quit()
-                sys.exit()
-            if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
-                # make first flap sound and return values for mainGame
-                SOUNDS['wing'].play()
-                return {
-                    'playery': playery + playerShmVals['val'],
-                    'basex': basex,
-                    'playerIndexGen': playerIndexGen,
-                }
 
-        # A RETIERER
-        SOUNDS['wing'].play()
+        if __name__ == '__main__':
+            SOUNDS['wing'].play()
+            return {
+                'playery': playery + playerShmVals['val'],
+                'basex': basex,
+                'playerIndexGen': playerIndexGen,
+            }
 
-        # Herel's modifications
+
         # Plays immediatly
         global has_to_start
         if has_to_start:
@@ -218,7 +212,8 @@ def show_welcome_animation():
 def main_game(movement_info):
     global score, birds
 
-    score = playerIndex = loopIter = 0
+    playerIndex = loopIter = 0
+    score = np.zeros(population)
     playerIndexGen = movement_info['playerIndexGen']
 
     # playerx, playery = int(SCREENWIDTH * 0.2), movement_info['playery']
@@ -263,7 +258,6 @@ def main_game(movement_info):
     is_alive = np.full(population, True)
 
     while True:
-
         # Herel's modifications
         # Reponds to flap function
         for i in birds:
@@ -285,7 +279,7 @@ def main_game(movement_info):
                         'basex': basex,
                         'upperPipes': upperPipes,
                         'lowerPipes': lowerPipes,
-                        'score': score,
+                        'score': score[i],
                         'playerVelY': playerVelY[i],
                         'playerRot': playerRot[i]
                     }
@@ -315,7 +309,7 @@ def main_game(movement_info):
             for pipe in upperPipes:
                 pipeMidPos = pipe['x'] + IMAGES['pipe'][0].get_width() / 2
                 if pipeMidPos <= playerMidPos < pipeMidPos + 4:
-                    score += 1
+                    score[i] += 1
                     SOUNDS['point'].play()
 
             # playerIndex basex change
@@ -366,7 +360,7 @@ def main_game(movement_info):
 
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
         # print score so player overlaps the score
-        showScore(score)
+        showScore(score[0])
 
         for i in birds:
             # Player rotation has a threshold
@@ -466,7 +460,7 @@ def getRandomPipe():
 
 def showScore(score):
     """displays score in center of screen"""
-    scoreDigits = [int(x) for x in list(str(score))]
+    scoreDigits = [int(x) for x in list(str(int(score)))]
     totalWidth = 0  # total width of all numbers to be printed
 
     for digit in scoreDigits:

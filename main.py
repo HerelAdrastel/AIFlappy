@@ -78,7 +78,7 @@ def main():
     # Starts game
     _thread.start_new_thread(start_flappy, ())
     generation = 1
-    population = 8
+    population = 1
     old_fitness_mean = 0
     new_fitness_mean = 0
 
@@ -87,22 +87,23 @@ def main():
 
     birds = create_first_population(population)
 
+    flappy.population = population
+
     while True:
         old_fitness_mean = new_fitness_mean
-
         for bird in birds:
             reset_bird(bird)
             # todo: tester de l'enlever
-            sleep(0.2)
+            #sleep(0.2)
 
         flappy.start()
 
         # todo: passer le tout en fonction
         # todo: passer le tout dans flappy.py et supprimer ici
-        flappy.score = 0
+        flappy.score = np.zeros(population)
         flappy.diff_x = np.zeros(population)
         flappy.diff_y = np.zeros(population)
-        flappy.is_alive = np.full(8, True)
+        flappy.is_alive = np.full(population, True)
 
         # While at least one bird is alive
         while np.all([flappy.is_alive, np.full(population, True)]):
@@ -111,6 +112,8 @@ def main():
 
                 if flappy.is_alive[i]:
                     bird = birds[i]
+
+                    bird.increase_fitness(flappy.score[i])
 
                     # todo : tester avant de l'enlever
                     bird.should_flap(0, 0)
@@ -122,7 +125,7 @@ def main():
                     if prediction:
                         flappy.flap(i)
 
-            # sleep(0.05)
+            sleep(0.01)
 
         # Updates array
         #birds[i] = bird
