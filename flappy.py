@@ -177,12 +177,7 @@ def show_welcome_animation():
     while True:
         pygame.event.pump()
 
-        # Allows to start the game by script
-        return {
-            'playery': playery + playerShmVals['val'],
-            'basex': basex,
-            'playerIndexGen': playerIndexGen,
-        }
+
         global has_to_start
         if has_to_start:
             SOUNDS['wing'].play()
@@ -221,7 +216,7 @@ def main_game(movement_info):
     # playerx, playery = int(SCREENWIDTH * 0.2), movement_info['playery']
     playerx = np.ones(population) * int(SCREENWIDTH * 0.2)
     #playery = np.ones(population) * movement_info['playery']
-    playery = np.random.uniform(-0.1, 0.1, population) * movement_info['playery']
+    playery = np.random.uniform(-0.1, 0.1, population) * movement_info['playery'] + 200
     basex = movement_info['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
 
@@ -231,16 +226,16 @@ def main_game(movement_info):
 
     # list of upper pipes
     # Herels modifictions: Passed from 200 to 0
-    # todo pass to -90 !!!!
+    # todo pass to SCREENWIDTH -90 !!!!
     upperPipes = [
-        {'x': SCREENWIDTH + 0, 'y': newPipe1[0]['y']},
-        {'x': SCREENWIDTH + 0 + (SCREENWIDTH / 2), 'y': newPipe2[0]['y']},
+        {'x': SCREENWIDTH, 'y': newPipe1[0]['y']},
+        {'x': SCREENWIDTH + (SCREENWIDTH / 2), 'y': newPipe2[0]['y']},
     ]
 
     # list of lowerpipe
     lowerPipes = [
-        {'x': SCREENWIDTH + 0, 'y': newPipe1[1]['y']},
-        {'x': SCREENWIDTH + 0 + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
+        {'x': SCREENWIDTH, 'y': newPipe1[1]['y']},
+        {'x': SCREENWIDTH + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
     ]
 
     pipeVelX = -4
@@ -280,7 +275,6 @@ def main_game(movement_info):
                                    upperPipes, lowerPipes)
             if crashTest[0]:
                 if len(birds) == 1:
-                    print("Flappy Score: {}".format(score))
                     birds = np.delete(birds, np.where(birds == i))
                     return {
                         'y': playery[i],
@@ -313,6 +307,8 @@ def main_game(movement_info):
             diff_x[i] = upperPipes[j]['x'] - playerx[i]
             diff_y[i] = playery[i] - gap_y + 16
 
+
+            # todo: changer par score[bird[i]]
             # check for score
             playerMidPos = playerx[i] + IMAGES['player'][0].get_width() / 2
             for pipe in upperPipes:

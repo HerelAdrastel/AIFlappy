@@ -23,7 +23,8 @@ class Bird:
             self.model = Sequential()  # Model Creation
 
             # Create a hidden layer with 2 input layers and 16 neurons and relu activation
-            self.model.add(Dense(units=16, input_dim=2, activation="relu"))
+            # todo: passer à 16 et en relu si ça ne marche pas
+            self.model.add(Dense(units=8, input_dim=2, activation="relu"))
 
             # Create the output layer
             self.model.add(Dense(units=1, activation='sigmoid'))
@@ -90,7 +91,7 @@ class Bird:
         else:
             return birdB
 
-    def mutate(self, mutation_probability=0.2, mutation_strength=0.3):
+    def mutate(self, mutation_probability, mutation_strength):
 
         for layer in self.model.layers:
             infos = layer.get_weights()
@@ -125,10 +126,11 @@ class Bird:
         prediction = self.model.predict(inputs)
         return prediction > 0.5
 
-    def increase_fitness(self, score):
+    def increase_fitness(self, score, diffx):
 
         self.distance_traveled += 1
-        self.fitness = score
+        self.fitness = score - diffx / 100
+        self.score = score
         #self.fitness = 5 * self.distance_traveled - diff_x + 1000 * score
         # self.fitness -= diff_x / 20
         #self.fitness += 10 * 1 / (diff_y * diff_y * 5 + 1) # + self.distance_traveled
