@@ -1,17 +1,47 @@
+import random
+from time import sleep
+
+import numpy as np
 import matplotlib.pyplot as plt
-        import numpy as np
+
 
 class Graph:
 
     def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.i = 0
+        self.xscale = 10
+        self.yscale = 10
+
+        fig = plt.figure(1)
+        self.ax = fig.add_subplot(111)
+        self.ax.set_xlim(0, self.xscale)
+        self.ax.set_ylim(0, 10)
+        self.line, = self.ax.plot(self.x, self.y, 'ko-')
+
+    def update(self, y):
+        self.i += 1
+
+        if self.i > self.xscale -2:
+            self.xscale += 10
+            self.ax.set_xlim(0, self.xscale)
+
+        if np.max(y) > self.yscale - 2:
+            self.yscale += 10
+            self.ax.set_ylim(0, self.yscale)
+
+        self.x = np.arange(len(y))
+        self.y = y
+
+        self.line.set_data(self.x, self.y)
 
 
-        plt.ion()
-        fig, ax = plt.subplots()
-        x, y = [], []
-        sc = ax.scatter(x, y)
-        plt.xlim(0, 10)
-        plt.ylim(0, 10)
+if __name__ == '__main__':
 
-        plt.draw()
-        scale = 10
+    gra = Graph()
+    a = np.array([])
+
+    a = np.append(a, random.uniform(0, 20))
+    gra.update(a)
+    plt.pause(0.1)
