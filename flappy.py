@@ -221,7 +221,7 @@ def main_game(movement_info):
     # playerx, playery = int(SCREENWIDTH * 0.2), movement_info['playery']
     playerx = np.ones(population) * int(SCREENWIDTH * 0.2)
     #playery = np.ones(population) * movement_info['playery']
-    playery = np.random.uniform(-0.5, 0.5, population)
+    playery = np.random.uniform(-0.1, 0.1, population) * movement_info['playery']
     basex = movement_info['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
 
@@ -231,15 +231,16 @@ def main_game(movement_info):
 
     # list of upper pipes
     # Herels modifictions: Passed from 200 to 0
+    # todo pass to -90 !!!!
     upperPipes = [
-        {'x': SCREENWIDTH - 90, 'y': newPipe1[0]['y']},
-        {'x': SCREENWIDTH - 90 + (SCREENWIDTH / 2), 'y': newPipe2[0]['y']},
+        {'x': SCREENWIDTH + 0, 'y': newPipe1[0]['y']},
+        {'x': SCREENWIDTH + 0 + (SCREENWIDTH / 2), 'y': newPipe2[0]['y']},
     ]
 
     # list of lowerpipe
     lowerPipes = [
-        {'x': SCREENWIDTH - 90, 'y': newPipe1[1]['y']},
-        {'x': SCREENWIDTH - 90 + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
+        {'x': SCREENWIDTH + 0, 'y': newPipe1[1]['y']},
+        {'x': SCREENWIDTH + 0 + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
     ]
 
     pipeVelX = -4
@@ -266,7 +267,6 @@ def main_game(movement_info):
 
         # Herel's modifications
         # Reponds to flap function
-        print(len(birds))
         for i in birds:
             # 1changer has to flap
             if playery[i] > -2 * IMAGES['player'][0].get_height() and has_to_flap[i]:
@@ -280,6 +280,8 @@ def main_game(movement_info):
                                    upperPipes, lowerPipes)
             if crashTest[0]:
                 if len(birds) == 1:
+                    print("Flappy Score: {}".format(score))
+                    birds = np.delete(birds, np.where(birds == i))
                     return {
                         'y': playery[i],
                         'groundCrash': crashTest[1],

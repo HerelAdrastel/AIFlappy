@@ -107,7 +107,8 @@ def main():
         flappy.is_alive = np.full(population, True)
 
         # While at least one bird is alive
-        while np.all([flappy.is_alive, np.full(population, True)]):
+        while len(flappy.birds) > 0:
+        #while np.all([flappy.is_alive, np.full(population, True)]):
 
             for i in range(len(birds)):
 
@@ -124,15 +125,14 @@ def main():
                     # todo : resoudre le problème des scores
                     prediction = bird.should_flap(diff_x, diff_y)
                     if prediction:
-                        None
-                        #flappy.flap(i)
+                        flappy.flap(i)
 
             sleep(0.01)
 
         # Updates array
         #birds[i] = bird
         #print("Generation {}: - Individual {}: - Fitness: {}".format(generation, i, bird.fitness))
-
+        print("Score {}".format(flappy.score))
         birds = sort_birds_by_fitness(birds)
 
         # Code moche !!!!!!
