@@ -60,7 +60,7 @@ def evolve_population(birds, best_birds=4):
     # Resets bird and mutate
 
     for bird in new_birds:
-        bird.mutate(1, 0.15)
+        bird.mutate(1, 1)
         bird.fitness = 0
         bird.score = 0
         bird.distance_traveled = 0
@@ -149,14 +149,15 @@ def main():
 
         fitnesses = np.append(fitnesses, np.max([bird.fitness for bird in birds]))
 
+        print("Generation {} - Best {} - Median {}".format(generation, birds[0].fitness, np.median([bird.fitness for bird in birds])))
 
         if birds[0].fitness > best_score_ever:
             best_bird_ever = best_bird_ever
             best_score_ever = birds[0].fitness
             print("New best score with {} !".format(best_score_ever))
 
-        if birds[0].score == 0:
-            print("Starting new population. This one was too bad :(")
+        if birds[0].score <= 0:
+            print("Starting new population. This one was too bad :(\n")
             # generation = 0
 
             best = birds[0]
@@ -164,9 +165,11 @@ def main():
             birds[0] = best
 
         else:
+            print("Evolving population...\n")
             birds = evolve_population(birds)
             birds[population - 1] = best_bird_ever
 
+        save(fitnesses, "save")
         generation += 1
 
 

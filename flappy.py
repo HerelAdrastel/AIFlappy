@@ -216,7 +216,7 @@ def main_game(movement_info):
     # playerx, playery = int(SCREENWIDTH * 0.2), movement_info['playery']
     playerx = np.ones(population) * int(SCREENWIDTH * 0.2)
     #playery = np.ones(population) * movement_info['playery']
-    playery = np.random.uniform(-0.1, 0.1, population) * movement_info['playery'] + 200
+    playery = np.random.uniform(-0.1, 0.1, population) + movement_info['playery']
     basex = movement_info['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
 
@@ -321,7 +321,7 @@ def main_game(movement_info):
             if (loopIter + 1) % 3 == 0:
                 playerIndex = next(playerIndexGen)
             loopIter = (loopIter + 1) % 30
-            basex = -((-basex + 100) % baseShift)
+
 
             # rotate the player
             if playerRot[i] > -90:
@@ -362,10 +362,10 @@ def main_game(movement_info):
         for uPipe, lPipe in zip(upperPipes, lowerPipes):
             SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
             SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
-
+        basex = -((-basex + 100) % baseShift)
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
         # print score so player overlaps the score
-        showScore(score[0])
+        showScore(np.max(score))
 
         for i in birds:
             # Player rotation has a threshold
@@ -378,7 +378,6 @@ def main_game(movement_info):
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
-
 
 def show_game_over_screen(crashInfo):
     """crashes the player down ans shows gameover image"""
@@ -432,7 +431,7 @@ def show_game_over_screen(crashInfo):
             SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
 
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
-        showScore(score)
+        showScore(np.max(score))
 
         playerSurface = pygame.transform.rotate(IMAGES['player'][1], playerRot)
         SCREEN.blit(playerSurface, (playerx, playery))
