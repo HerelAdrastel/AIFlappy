@@ -24,23 +24,15 @@ class Bird:
 
             # Create a hidden layer with 2 input layers and 16 neurons and relu activation
             # todo: passer à 16 et en relu si ça ne marche pas
-            self.model.add(Dense(units=8, input_dim=2, activation="relu"))
+            self.model.add(Dense(units=8, input_dim=2, activation="relu", kernel_initializer="random_uniform", bias_initializer="random_uniform"))
 
             # Create the output layer
-            self.model.add(Dense(units=1, activation='sigmoid'))
+            self.model.add(Dense(units=1, activation='sigmoid', kernel_initializer="random_uniform", bias_initializer="random_uniform"))
 
             sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
             self.model.compile(loss="mse", optimizer=sgd, metrics=["accuracy"])
             self.model._make_predict_function()
 
-            # By default, all biases are set to 0
-            # Set all biases to a random number
-            for layer in self.model.layers:
-                weights = layer.get_weights()
-                new_biases = np.random.uniform(size=len(weights[1]))
-
-                weights[1] = new_biases
-                layer.set_weights(weights)
 
     def crossover(cls, birdA, birdB):
         """
