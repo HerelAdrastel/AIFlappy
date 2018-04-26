@@ -25,7 +25,7 @@ def sort_birds_by_fitness(birds):
     return sorted(birds, key=lambda x: x.fitness, reverse=True)
 
 
-def evolve_population(birds, best_birds=3):
+def evolve_population(birds, best_birds=4):
     """
 
     :param birds: The birds
@@ -35,35 +35,35 @@ def evolve_population(birds, best_birds=3):
 
     new_birds = []
 
-    for i in range(len(birds)):
+    if len(birds) != 10:
+        raise Exception("Bird's length must be equal to 10")
 
-        # Keep the best birds
-        if i < best_birds:
-            new_birds.append(birds[i])
-            new_birds[i].mutate(0.05, 0.05)
+    # Keep the N best_birds (4 by default)
+    for i in range(best_birds):
+        new_birds.append(birds[i])
 
-        # The rest of the room available is cut by 2
-        # Crosses over with the best winners
-        elif i < ceil((len(birds) - best_birds) / 2):
-            parentA = birds[random.randint(0, best_birds) - 1]
-            parentB = birds[random.randint(0, best_birds) - 1]
-            new_birds.append(Bird.crossover(parentA, parentB))
+    # Make a crossover of the 2 best winners
+    new_birds.append(Bird.crossover(birds[0], birds[1]))
 
-            # Make a mutation
-            new_birds[i].mutate(0.1, 0.1)
+    # Makes 3 crossovers of random best_birds (4 by default)
+    for i in range(3):
+        birdA = birds[random.randint(0, best_birds - 1)]
+        birdB = birds[random.randint(0, best_birds - 1)]
 
-        # Crosses over with a random
-        else:
-            parentA = birds[random.randint(0, len(birds)) - 1]
-            parentB = birds[random.randint(0, len(birds)) - 1]
-            new_birds.append(Bird.crossover(parentA, parentB))
+        new_birds.append(Bird.crossover(birdA, birdB))
 
-            # Make a mutation
-            new_birds[i].mutate(0.3, 0.3)
+    # Copies one bird among the bests
+    for i in range(2):
+        new_birds.append(birds[random.randint(0, best_birds -1)])
 
-        # Reset fitness
-        new_birds[i].distance_traveled = 0
-        new_birds[i].fitness = 0
+
+    # Resets bird and mutate
+
+    for bird in new_birds:
+        bird.mutate(1, 0.15)
+        bird.fitness = 0
+        bird.score = 0
+        bird.distance_traveled = 0
 
     return new_birds
 
@@ -78,6 +78,7 @@ def arg():
         return float(sys.argv[1])
 
     return 1
+
 
 def reset_bird(bird):
     bird.fitness = 0
@@ -96,7 +97,7 @@ def main():
     # Starts game
     _thread.start_new_thread(start_flappy, ())
     generation = 1
-    population = 9
+    population = 10
 
     best_bird_ever = Bird()
     best_score_ever = 0
@@ -116,7 +117,7 @@ def main():
 
         # todo: passer le tout en fonction
         # todo: passer le tout dans flappy.py et supprimer ici
-        flappy.pooulation = population
+        flappy.population = population
         flappy.score = np.zeros(population)
         flappy.diff_x = np.zeros(population)
         flappy.diff_y = np.zeros(population)
@@ -147,7 +148,7 @@ def main():
         birds = sort_birds_by_fitness(birds)
 
         fitnesses = np.append(fitnesses, np.max([bird.fitness for bird in birds]))
-        save(fitnesses, arg())
+
 
         if birds[0].fitness > best_score_ever:
             best_bird_ever = best_bird_ever
