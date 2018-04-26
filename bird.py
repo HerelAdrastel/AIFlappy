@@ -129,7 +129,7 @@ class Bird:
     def increase_fitness(self, score, diffx):
 
         self.distance_traveled += 1
-        self.fitness = score - diffx / 100
+        self.fitness = score - diffx / 1000
         self.score = score
         #self.fitness = 5 * self.distance_traveled - diff_x + 1000 * score
         # self.fitness -= diff_x / 20

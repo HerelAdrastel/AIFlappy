@@ -19,6 +19,7 @@ class Graph:
         self.ax.set_xlim(0, self.xscale)
         self.ax.set_ylim(0, 10)
         self.line, = self.ax.plot(self.x, self.y, 'ko-')
+        plt.pause(0.001)
 
     def update(self, y):
         self.i += 1
@@ -44,4 +45,3 @@ if __name__ == '__main__':
 
     a = np.append(a, random.uniform(0, 20))
     gra.update(a)
-    plt.pause(0.1)

@@ -1,14 +1,15 @@
 import _thread
-import math
 import random
+import sys
 from math import ceil
-from queue import Queue
+from os import system
 from time import sleep
 
-
 import numpy as np
+
 import flappy
 from bird import Bird
+from graph import Graph
 
 
 def create_first_population(population_length):
@@ -71,10 +72,24 @@ def start_flappy():
     flappy.main()
 
 
+def arg():
+    if len(sys.argv) > 1:
+        print(sys.argv[1])
+        return float(sys.argv[1])
+
+    return 1
+
 def reset_bird(bird):
     bird.fitness = 0
     bird.distance_traveled = 0
     bird.create_brain()
+
+
+def save(array, name):
+    system("touch {}.txt".format(name))
+    with open("{}.txt".format(name), 'w') as file:
+        for item in array:
+            file.write("{}\n".format(item))
 
 
 def main():
@@ -82,8 +97,6 @@ def main():
     _thread.start_new_thread(start_flappy, ())
     generation = 1
     population = 9
-    old_fitness_mean = 0
-    new_fitness_mean = 0
 
     best_bird_ever = Bird()
     best_score_ever = 0
@@ -92,13 +105,12 @@ def main():
 
     flappy.population = population
 
+    fitnesses = np.array([])
+
     while True:
-        old_fitness_mean = new_fitness_mean
-        new_fitness_mean = 0
+
         for bird in birds:
             reset_bird(bird)
-            # todo: tester de l'enlever
-            #sleep(0.2)
 
         flappy.start()
 
@@ -119,7 +131,6 @@ def main():
                 if flappy.is_alive[i]:
                     bird = birds[i]
 
-
                     # todo : tester avant de l'enlever
                     bird.should_flap(0, 0)
 
@@ -131,25 +142,13 @@ def main():
                     if prediction:
                         flappy.flap(i)
 
-            sleep(0.01)
-
-        # Updates array
-        #birds[i] = bird
-        #print("Generation {}: - Individual {}: - Fitness: {}".format(generation, i, bird.fitness))
+            sleep(0.03)
 
         birds = sort_birds_by_fitness(birds)
 
-        # Code moche !!!!!!
+        fitnesses = np.append(fitnesses, np.max([bird.fitness for bird in birds]))
+        save(fitnesses, arg())
 
-        for bird in birds:
-            new_fitness_mean += bird.fitness
-
-        print("Old: {} VS New {}".format(old_fitness_mean, new_fitness_mean))
-        # todo: garder le meilleur oiseau de tout les temps
-        # todo : fitness : score - A * diffX
-        # todo: ne pas avoir le debug, spawn pipes direct
-
-        # todo matplot !!!!
         if birds[0].fitness > best_score_ever:
             best_bird_ever = best_bird_ever
             best_score_ever = birds[0].fitness
@@ -157,7 +156,7 @@ def main():
 
         if birds[0].score == 0:
             print("Starting new population. This one was too bad :(")
-            #generation = 0
+            # generation = 0
 
             best = birds[0]
             birds = create_first_population(population)
