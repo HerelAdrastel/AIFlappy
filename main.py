@@ -102,7 +102,11 @@ def main():
     best_bird_ever = Bird()
     best_score_ever = 0
 
+
     birds = create_first_population(population)
+
+    best_mean_ever = 0
+    best_population_ever = birds
 
     flappy.population = population
 
@@ -149,23 +153,31 @@ def main():
 
         fitnesses = np.append(fitnesses, np.max([bird.fitness for bird in birds]))
 
+        best_score = birds[0].fitness
+        mean = np.mean([bird.fitness for bird in birds])
 
-        if birds[0].fitness > best_score_ever:
-            best_bird_ever = best_bird_ever
-            best_score_ever = birds[0].fitness
-            print("New best score with {} !".format(best_score_ever))
+        print("Generation {} - Best {} - Mean {}".format(generation, best_score, mean))
 
-        if birds[0].score == 0:
-            print("Starting new population. This one was too bad :(")
-            # generation = 0
+        if mean >= best_mean_ever:
+            print("Mean beaten ! Old: {} - New: {}".format(best_mean_ever, mean))
+
+        if best_score <= 0:
+            print("Starting new population. This one was too bad :(\n")
 
             best = birds[0]
             birds = create_first_population(population)
             birds[0] = best
 
-        else:
+        elif mean < best_mean_ever:
+            print("Rollback to the best population. This one was quite bad :/\n")
+
+            birds = best_population_ever
             birds = evolve_population(birds)
-            birds[population - 1] = best_bird_ever
+
+        else:
+            print("Normal population. Evolving...\n")
+
+            birds = evolve_population(birds)
 
         generation += 1
 
