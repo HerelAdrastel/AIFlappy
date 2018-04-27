@@ -6,10 +6,11 @@ from os import system
 from time import sleep
 
 import numpy as np
-
+from subprocess import call
 import flappy
 from bird import Bird
-from graph import Graph
+from keras import backend as K
+import tensorflow as tf
 
 
 def create_first_population(population_length):
@@ -58,9 +59,10 @@ def evolve_population(birds, best_birds=4):
 
 
     # Resets bird and mutate
+    new_birds[8].mutation(0.15)
 
     for bird in new_birds:
-        bird.mutate(1, 1)
+        #bird.mutation(-1)
         bird.fitness = 0
         bird.score = 0
         bird.distance_traveled = 0
@@ -96,6 +98,15 @@ def save(array, name):
 def main():
     # Starts game
     _thread.start_new_thread(start_flappy, ())
+
+    # Code DEGUEULASSE
+
+    session = tf.Session()
+    K.set_session(session)
+
+
+    # FIN
+
     generation = 1
     population = 10
 
@@ -156,13 +167,16 @@ def main():
             best_score_ever = birds[0].fitness
             print("New best score with {} !".format(best_score_ever))
 
-        if birds[0].score <= 0:
+        if True:
+        #if birds[0].score <= 0:
             print("Starting new population. This one was too bad :(\n")
             # generation = 0
-
+            tf.reset_default_graph()
+            sleep(1)
             best = birds[0]
             birds = create_first_population(population)
             birds[0] = best
+
 
         else:
             print("Evolving population...\n")

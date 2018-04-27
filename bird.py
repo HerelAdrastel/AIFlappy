@@ -1,8 +1,12 @@
 import random
+import tensorflow
+
+from numpy.random import seed
 
 from keras import Sequential
 from keras.layers import Dense, np
 from keras.optimizers import SGD
+from tensorflow import set_random_seed
 
 
 class Bird:
@@ -20,18 +24,25 @@ class Bird:
         inputs is an array
         """
         if self.model is None:
+
+            seed(random.randint(0, 50))
+            set_random_seed(random.randint(0, 50))
+
             self.model = Sequential()  # Model Creation
 
             # Create a hidden layer with 2 input layers and 16 neurons and relu activation
             # todo: passer à 16 et en relu si ça ne marche pas
-            self.model.add(Dense(units=8, input_dim=2, activation="relu", kernel_initializer="random_uniform", bias_initializer="random_uniform"))
+            self.model.add(Dense(units=8, input_dim=2, activation="relu", kernel_initializer="random_uniform",
+                                 bias_initializer="random_uniform"))
 
             # Create the output layer
-            self.model.add(Dense(units=1, activation='sigmoid', kernel_initializer="random_uniform", bias_initializer="random_uniform"))
+            self.model.add(Dense(units=1, activation='sigmoid', kernel_initializer="random_uniform",
+                                 bias_initializer="random_uniform"))
 
             sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
             self.model.compile(loss="mse", optimizer=sgd, metrics=["accuracy"])
-            self.model._make_predict_function()
+            #self.model._make_predict_function()
+
 
 
     def crossover(cls, birdA, birdB):
@@ -83,28 +94,33 @@ class Bird:
         else:
             return birdB
 
-    def mutate(self, mutation_probability, mutation_strength):
+    # noinspection PyShadowingBuiltins
+    def mutation(self, mutation_probability=0.2):
 
-        for layer in self.model.layers:
-            infos = layer.get_weights()
+        for layer in range(len(self.model.layers)):
 
-            weights = infos[0]
-            biases = infos[1]
+            weights = self.model.layers[layer].get_weights()[0]
+            biases = self.model.layers[layer].get_weights()[1]
 
             for inputs in range(len(weights)):
                 for input in range(len(weights[inputs])):
-                    new_weight = Bird.mutate_weight(input, mutation_probability, mutation_strength)
-                    layer.get_weights()[0][inputs][input] = new_weight
+                    old_weight = weights[inputs][input]
+                    new_weight = self.mutate(old_weight, mutation_probability)
+
+                    weights[inputs][input] = new_weight
 
             for bias in range(len(biases)):
-                new_bias = Bird.mutate_weight(bias, mutation_probability, mutation_strength)
-                layer.get_weights()[1][bias] = new_bias
+                old_bias = biases[bias]
+                new_bias = self.mutate(old_bias, mutation_probability)
 
+                biases[bias] = new_bias
 
-    def mutate_weight(cls, weight, mutation_probability, mutation_strength):
+            self.model.layers[layer].set_weights([weights, biases])
+
+    def mutate(cls, weight, mutation_probability):
 
         if random.random() < mutation_probability:
-            mutationIntensity = 1 + random.uniform(- mutation_strength, mutation_strength)
+            mutationIntensity = 1 + ((random.random() - 0.5) * 3 + (random.random() - 0.5))
             weight *= mutationIntensity
 
         return weight
@@ -123,11 +139,10 @@ class Bird:
         self.distance_traveled += 1
         self.fitness = score - diffx / 1000
         self.score = score
-        #self.fitness = 5 * self.distance_traveled - diff_x + 1000 * score
+        # self.fitness = 5 * self.distance_traveled - diff_x + 1000 * score
         # self.fitness -= diff_x / 20
-        #self.fitness += 10 * 1 / (diff_y * diff_y * 5 + 1) # + self.distance_traveled
-        #self.fitness += 5 - (1 / 5000) * pow(diff_y, 2)
-
+        # self.fitness += 10 * 1 / (diff_y * diff_y * 5 + 1) # + self.distance_traveled
+        # self.fitness += 5 - (1 / 5000) * pow(diff_y, 2)
 
     crossover = classmethod(crossover)
-    mutate_weight = classmethod(mutate_weight)
+    mutate = classmethod(mutate)
