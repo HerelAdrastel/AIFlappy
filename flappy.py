@@ -220,7 +220,7 @@ def main_game(movement_info):
     # playerx, playery = int(SCREENWIDTH * 0.2), movement_info['playery']
     playerx = np.ones(population) * int(SCREENWIDTH * 0.2)
     #playery = np.ones(population) * movement_info['playery']
-    playery = np.random.uniform(-10, 10, population) + movement_info['playery']
+    playery = np.random.uniform(-50, 50, population) + movement_info['playery']
     basex = movement_info['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
 
@@ -341,7 +341,7 @@ def main_game(movement_info):
                 playerRot[i] = 45
 
             playery[i] += min(playerVelY[i], BASEY - playery[i] - playerHeight)
-            # playery = pygame.mouse.get_pos()[1] - playerHeight
+            #playery = np.full(population, pygame.mouse.get_pos()[1] - playerHeight)
             # print(diff_x)
 
         # move pipes to left

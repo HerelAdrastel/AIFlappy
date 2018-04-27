@@ -4,7 +4,7 @@ import numpy as np
 
 class NeuralNetwork:
     
-    hidden_neurons = 16
+    hidden_neurons = 6
 
     def __init__(self):
 
@@ -23,17 +23,17 @@ class NeuralNetwork:
     def sigmoid(nb):
         return 1 / (1 + np.exp(-nb))
 
-    def create_brain(self):
+    def create_brain(self, initial_value=30):
         # Create weights for hidden layer
-        w1 = np.random.uniform(-1, 1, NeuralNetwork.hidden_neurons)
-        w2 = np.random.uniform(-1, 1, NeuralNetwork.hidden_neurons)
-        biases = np.random.uniform(-1, 1, NeuralNetwork.hidden_neurons)
+        w1 = np.random.uniform(-initial_value, initial_value, NeuralNetwork.hidden_neurons)
+        w2 = np.random.uniform(-initial_value, initial_value, NeuralNetwork.hidden_neurons)
+        biases = np.random.uniform(-initial_value, initial_value, NeuralNetwork.hidden_neurons)
 
         self.hidden_layer = np.array([[w1, w2], biases])
 
         # Creates weights for output layer
-        w = np.random.uniform(-1, 1, NeuralNetwork.hidden_neurons)
-        bias = np.random.uniform(-1, 1)
+        w = np.random.uniform(-initial_value, initial_value, NeuralNetwork.hidden_neurons)
+        bias = np.random.uniform(-initial_value, initial_value)
         self.output_layer = np.array([[w], bias])
 
     def predict(self, diffX, diffY):

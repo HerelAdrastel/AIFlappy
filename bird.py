@@ -27,7 +27,7 @@ class Bird:
         biasesA = birdA.model.hidden_layer[1]
         biasesB = birdB.model.hidden_layer[1]
 
-        cut = random.randint(0, len(biasesA))
+        cut = random.randint(0, len(biasesA) - 1)
 
         for i in range(cut):
             oldBiasA = biasesA[i]
