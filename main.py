@@ -1,16 +1,13 @@
 import _thread
 import random
 import sys
-from math import ceil
 from os import system
 from time import sleep
 
 import numpy as np
-from subprocess import call
+
 import flappy
 from bird import Bird
-from keras import backend as K
-import tensorflow as tf
 
 
 def create_first_population(population_length):
@@ -55,14 +52,12 @@ def evolve_population(birds, best_birds=4):
 
     # Copies one bird among the bests
     for i in range(2):
-        new_birds.append(birds[random.randint(0, best_birds -1)])
-
+        new_birds.append(birds[random.randint(0, best_birds - 1)])
 
     # Resets bird and mutate
-    new_birds[8].mutation(0.15)
+    new_birds[9].mutation()
 
     for bird in new_birds:
-        #bird.mutation(-1)
         bird.fitness = 0
         bird.score = 0
         bird.distance_traveled = 0
@@ -99,14 +94,6 @@ def main():
     # Starts game
     _thread.start_new_thread(start_flappy, ())
 
-    # Code DEGUEULASSE
-
-    session = tf.Session()
-    K.set_session(session)
-
-
-    # FIN
-
     generation = 1
     population = 10
 
@@ -119,12 +106,11 @@ def main():
 
     fitnesses = np.array([])
 
+
     while True:
 
         for bird in birds:
             reset_bird(bird)
-
-        flappy.start()
 
         # todo: passer le tout en fonction
         # todo: passer le tout dans flappy.py et supprimer ici
@@ -135,6 +121,8 @@ def main():
         flappy.is_alive = np.full(population, True)
         flappy.birds = np.arange(population)
 
+        sleep(1)
+        flappy.start()
         # While at least one bird is alive
         while len(flappy.birds) > 0:
 
@@ -154,28 +142,29 @@ def main():
                     if prediction:
                         flappy.flap(i)
 
-            sleep(0.03)
+            sleep(0.01)
 
         birds = sort_birds_by_fitness(birds)
 
         fitnesses = np.append(fitnesses, np.max([bird.fitness for bird in birds]))
 
-        print("Generation {} - Best {} - Median {}".format(generation, birds[0].fitness, np.median([bird.fitness for bird in birds])))
+        print("Generation {} - Best {} - Median {}".format(generation, birds[0].fitness,
+                                                           np.median([bird.fitness for bird in birds])))
+
 
         if birds[0].fitness > best_score_ever:
             best_bird_ever = best_bird_ever
             best_score_ever = birds[0].fitness
             print("New best score with {} !".format(best_score_ever))
 
-        if True:
-        #if birds[0].score <= 0:
+        if birds[0].score <= 0:
             print("Starting new population. This one was too bad :(\n")
             # generation = 0
-            tf.reset_default_graph()
             sleep(1)
             best = birds[0]
             birds = create_first_population(population)
             birds[0] = best
+
 
 
         else:

@@ -17,7 +17,7 @@ BASEY = SCREENHEIGHT * 0.79
 IMAGES, SOUNDS, HITMASKS = {}, {}, {}
 
 # Herel's modifications
-population = 8
+population = 10
 diff_x = np.zeros(population)
 diff_y = np.zeros(population)
 is_alive = np.full(8, True)
@@ -70,6 +70,7 @@ xrange = range
 
 def main():
     global SCREEN, FPSCLOCK
+
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
@@ -208,6 +209,9 @@ def show_welcome_animation():
 def main_game(movement_info):
 
     global score, birds
+
+    # todo: a suprimer
+    random.seed(500)
 
     playerIndex = loopIter = 0
     score = np.zeros(population)
