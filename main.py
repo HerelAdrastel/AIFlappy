@@ -55,7 +55,7 @@ def evolve_population(birds, best_birds=4):
         new_birds.append(birds[random.randint(0, best_birds - 1)])
 
     for bird in new_birds:
-        bird.mutation()
+        bird.mutation(0.2)
         bird.fitness = 0
         bird.score = 0
         bird.distance_traveled = 0
@@ -117,7 +117,7 @@ def main():
         flappy.diff_y = np.zeros(population)
         flappy.is_alive = np.full(population, True)
         flappy.birds = np.arange(population)
-
+        flappy.birdsModel = birds
         sleep(1)
         flappy.start()
         # While at least one bird is alive
@@ -129,7 +129,6 @@ def main():
                     bird = birds[i]
 
                     # todo : tester avant de l'enlever
-                    bird.should_flap(0, 0)
 
                     diff_x = flappy.diff_x[i]
                     diff_y = flappy.diff_y[i]

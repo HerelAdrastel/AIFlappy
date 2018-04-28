@@ -69,10 +69,11 @@ class Bird:
         self.model.output_layer[1] = Bird.mutate(self.model.output_layer[1], mutation_probability)
 
     @staticmethod
-    def mutate(weight, mutation_probability):
+    def mutate(weight, mutation_probability, mutation_strength=0.05):
 
         if random.random() < mutation_probability:
-            mutationIntensity = 1 + ((random.random() - 0.5) * 3 + (random.random() - 0.5))
+            #mutationIntensity = 1 + ((random.random() - 0.5) * 3 + (random.random() - 0.5))
+            mutationIntensity = 1 + random.uniform(-mutation_strength, mutation_strength)
             weight *= mutationIntensity
 
         return weight

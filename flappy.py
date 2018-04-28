@@ -26,6 +26,8 @@ has_to_start = False
 has_to_restart = False
 score = np.zeros(8)
 
+birdsModel = []
+
 birds = np.arange(population)
 
 # Reminder : to avoid the window to freeze, add pygame.event.pump() in the main loop
@@ -178,7 +180,6 @@ def show_welcome_animation():
     while True:
         pygame.event.pump()
 
-
         global has_to_start
         if has_to_start:
             SOUNDS['wing'].play()
@@ -207,7 +208,6 @@ def show_welcome_animation():
 
 
 def main_game(movement_info):
-
     global score, birds
 
     # todo: a suprimer
@@ -219,7 +219,7 @@ def main_game(movement_info):
 
     # playerx, playery = int(SCREENWIDTH * 0.2), movement_info['playery']
     playerx = np.ones(population) * int(SCREENWIDTH * 0.2)
-    #playery = np.ones(population) * movement_info['playery']
+    # playery = np.ones(population) * movement_info['playery']
     playery = np.random.uniform(-50, 50, population) + movement_info['playery']
     basex = movement_info['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
@@ -256,7 +256,7 @@ def main_game(movement_info):
 
     birds = np.arange(population)
     # Herel's modifications
-    global has_to_flap, is_alive
+    global has_to_flap, is_alive, diff_x, diff_y
     is_alive = np.full(population, True)
 
     while True:
@@ -267,6 +267,11 @@ def main_game(movement_info):
         # Herel's modifications
         # Reponds to flap function
         for i in birds:
+
+            birdsModel[i].increase_fitness(score[i], diff_x[i])
+            if birdsModel[i].should_flap(diff_x[i], diff_y[i]):
+                flap(i)
+
             # 1changer has to flap
             if playery[i] > -2 * IMAGES['player'][0].get_height() and has_to_flap[i]:
                 playerVelY[i] = playerFlapAcc
@@ -296,8 +301,6 @@ def main_game(movement_info):
                     continue
                 # showGameOverScreen(crashInfos)
             # Herel's modification
-            global diff_x
-            global diff_y
             j = 0
             while True:
                 if upperPipes[j]['x'] > playerx[i]:
@@ -310,7 +313,6 @@ def main_game(movement_info):
             gap_y = upperPipes[j]['y'] + IMAGES['pipe'][0].get_height() + gap_height / 2
             diff_x[i] = upperPipes[j]['x'] - playerx[i]
             diff_y[i] = playery[i] - gap_y + 16
-
 
             # todo: changer par score[bird[i]]
             # check for score
@@ -326,7 +328,6 @@ def main_game(movement_info):
                 playerIndex = next(playerIndexGen)
             loopIter = (loopIter + 1) % 30
 
-
             # rotate the player
             if playerRot[i] > -90:
                 playerRot[i] -= playerVelRot[i]
@@ -341,7 +342,7 @@ def main_game(movement_info):
                 playerRot[i] = 45
 
             playery[i] += min(playerVelY[i], BASEY - playery[i] - playerHeight)
-            #playery = np.full(population, pygame.mouse.get_pos()[1] - playerHeight)
+            # playery = np.full(population, pygame.mouse.get_pos()[1] - playerHeight)
             # print(diff_x)
 
         # move pipes to left
@@ -382,6 +383,7 @@ def main_game(movement_info):
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+
 
 def show_game_over_screen(crashInfo):
     """crashes the player down ans shows gameover image"""
